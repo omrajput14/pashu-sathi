@@ -25,7 +25,7 @@ describe('AIScreeningsLedgerTable Component', () => {
       district: 'Pune',
       taluka: 'Haveli',
       state: 'Maharashtra',
-      imageUrl: 'https://s3.aws.amazon.com/vetra-scans/scan_01.jpg',
+      imageUrl: 'https://api.vetra.co.in/media/vetra-scans/scan_01.jpg',
       createdAt: '2026-08-30T10:30:00Z',
       updatedAt: '2026-08-30T10:30:00Z',
     },

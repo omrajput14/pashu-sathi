@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import { ApiResponse } from '../types/auth.types';
 import { SystemConfigurationResponse, HealthResponse } from '../types/system.types';
+import axios from 'axios';
 
 export const systemService = {
   /**
@@ -15,18 +16,23 @@ export const systemService = {
   },
 
   /**
-   * Checks backend service readiness.
+   * Checks backend service readiness via Spring Boot Actuator or readiness probe.
+   * Target: https://api.vetra.co.in/actuator/health
    */
   getHealthStatus: async (): Promise<HealthResponse> => {
-    const response = await apiClient.get<ApiResponse<HealthResponse>>('/health/readiness', {
-      baseURL: '', // hits root endpoint
-    }).catch(async () => {
-      // Fallback to /readiness
-      const fallback = await apiClient.get<ApiResponse<HealthResponse>>('/readiness', {
-        baseURL: '',
-      });
-      return fallback;
-    });
-    return response.data.data || { status: 'READY' };
+    const rootUrl = (apiClient.defaults.baseURL || 'https://api.vetra.co.in/api/v1').replace(/\/api\/v1\/?$/, '');
+    try {
+      const response = await axios.get(`${rootUrl}/actuator/health`, { timeout: 8000 });
+      const status = response.data?.status || 'UP';
+      return { status, timestamp: new Date().toISOString() };
+    } catch {
+      try {
+        const fallback = await axios.get(`${rootUrl}/readiness`, { timeout: 8000 });
+        const status = fallback.data?.data?.status || fallback.data?.status || 'READY';
+        return { status, timestamp: fallback.data?.data?.timestamp || new Date().toISOString() };
+      } catch {
+        return { status: 'DEGRADED', timestamp: new Date().toISOString() };
+      }
+    }
   },
 };

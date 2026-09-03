@@ -22,20 +22,19 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login({ identifier: identifier.trim(), password });
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        const axiosError = err as { response?: { data?: { message?: string } } };
-        setError(
-          axiosError?.response?.data?.message ||
-            'Authentication failed. Please verify your officer credentials and role permissions.'
-        );
-      }
+    } catch (err: any) {
+      const serverMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error?.message ||
+        (typeof err?.message === 'string' ? err.message : null) ||
+        'Authentication failed. Please verify your officer credentials and role permissions.';
+      setError(serverMsg);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+
 
   const handleFillDemo = (id: string, pass: string) => {
     setIdentifier(id);
@@ -153,7 +152,7 @@ export const LoginPage: React.FC = () => {
             </Button>
           </form>
 
-          {/* Quick-Fill Credentials Card for Demonstration & Evaluation */}
+          {/* Demonstration Officer Accounts Quick-Fill Card */}
           <div className="mt-5 p-3.5 bg-[#F6F8FA] border border-[#E1E6EC] rounded-[4px] text-xs font-mono text-[#526074]">
             <div className="text-[11px] font-semibold text-[#101826] uppercase mb-2 flex items-center gap-1.5">
               <KeyRound className="w-3.5 h-3.5 text-[#1E5C97]" />
@@ -162,13 +161,13 @@ export const LoginPage: React.FC = () => {
             <div className="flex flex-col gap-2 text-[11px]">
               <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded border border-[#E1E6EC]">
                 <div>
-                  <span className="text-[#101826] font-semibold">Surveillance Officer:</span>
-                  <div className="text-[#1E5C97]">officer@vetra.gov.in · Password@123</div>
+                  <span className="text-[#101826] font-semibold">Chief Administrator:</span>
+                  <div className="text-[#1E5C97]">admin@vetra.gov.in · Password@123</div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleFillDemo('officer@vetra.gov.in', 'Password@123')}
-                  className="text-[10px] bg-[#E4EDF6] text-[#1E5C97] px-2 py-1 rounded font-semibold hover:bg-[#D4E4F3] transition-colors"
+                  onClick={() => handleFillDemo('admin@vetra.gov.in', 'Password@123')}
+                  className="text-[10px] bg-[#E4EDF6] text-[#1E5C97] px-2 py-1 rounded font-semibold hover:bg-[#D4E4F3] transition-colors cursor-pointer"
                 >
                   Fill
                 </button>
@@ -176,13 +175,13 @@ export const LoginPage: React.FC = () => {
 
               <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded border border-[#E1E6EC]">
                 <div>
-                  <span className="text-[#101826] font-semibold">Chief Administrator:</span>
-                  <div className="text-[#1E5C97]">admin@vetra.gov.in · Password@123</div>
+                  <span className="text-[#101826] font-semibold">Surveillance Officer:</span>
+                  <div className="text-[#1E5C97]">officer@vetra.gov.in · Password@123</div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleFillDemo('admin@vetra.gov.in', 'Password@123')}
-                  className="text-[10px] bg-[#E4EDF6] text-[#1E5C97] px-2 py-1 rounded font-semibold hover:bg-[#D4E4F3] transition-colors"
+                  onClick={() => handleFillDemo('officer@vetra.gov.in', 'Password@123')}
+                  className="text-[10px] bg-[#E4EDF6] text-[#1E5C97] px-2 py-1 rounded font-semibold hover:bg-[#D4E4F3] transition-colors cursor-pointer"
                 >
                   Fill
                 </button>

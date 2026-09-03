@@ -15,12 +15,14 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'https://api.vetra.co.in',
         changeOrigin: true,
+        secure: true,
       },
       '/actuator': {
-        target: 'http://localhost:8080',
+        target: 'https://api.vetra.co.in',
         changeOrigin: true,
+        secure: true,
       },
       '/maptiler-tiles': {
         target: 'https://api.maptiler.com',

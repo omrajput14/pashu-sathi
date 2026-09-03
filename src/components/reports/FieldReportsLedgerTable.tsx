@@ -209,7 +209,7 @@ export const FieldReportsLedgerTable: React.FC<FieldReportsLedgerTableProps> = (
 
                     {/* Reporter */}
                     <td className="py-2.5 px-3 font-mono text-[11px] text-[#526074] max-w-[130px] truncate">
-                      {report.reportedByName || 'Staff Vet'}
+                      {report.reportedByName || '—'}
                     </td>
 
                     {/* Action: Inspect */}

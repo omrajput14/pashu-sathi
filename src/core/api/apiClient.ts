@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { ApiResponse, AuthResponse } from '../types/auth.types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.vetra.co.in/api/v1';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
