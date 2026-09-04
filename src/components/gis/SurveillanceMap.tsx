@@ -84,12 +84,6 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
     // Retrieve MapTiler API Key from environment configuration
     const maptilerApiKey = getMapTilerApiKey();
 
-    const isVercelOrRemote =
-      typeof window !== 'undefined' &&
-      window.location &&
-      window.location.hostname &&
-      !['localhost', '127.0.0.1'].includes(window.location.hostname);
-
     if (!maptilerApiKey) {
       setIsKeyConfigured(false);
       // Fallback to high-performance CARTO Voyager basemap if MapTiler API key is absent
@@ -108,29 +102,24 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
       setIsKeyConfigured(true);
       let tileUrl = getMapTilerTileUrl(MAPTILER_CONFIG.defaultStyle, maptilerApiKey);
 
-      // On Vercel or remote deployment hosts, MapTiler keys with localhost restrictions return HTTP 403
-      // watermarked tiles. We automatically route to CARTO Voyager for pristine, crystal-clear basemaps.
-      if (isVercelOrRemote) {
-        tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-      } else if (
+      // In local dev with non-3000 port, proxy through Vite to preserve Referer
+      if (
         typeof window !== 'undefined' &&
         window.location &&
         window.location.port &&
-        window.location.port !== '3000'
+        window.location.port !== '3000' &&
+        ['localhost', '127.0.0.1'].includes(window.location.hostname)
       ) {
         tileUrl = `/maptiler-tiles/maps/${MAPTILER_CONFIG.defaultStyle}/{z}/{x}/{y}.png?key=${maptilerApiKey}`;
       }
 
       const tileLayer = L.tileLayer(tileUrl, {
-        subdomains: 'abcd',
-        tileSize: isVercelOrRemote ? 256 : MAPTILER_CONFIG.tileSize,
-        zoomOffset: isVercelOrRemote ? 0 : MAPTILER_CONFIG.zoomOffset,
+        tileSize: MAPTILER_CONFIG.tileSize,
+        zoomOffset: MAPTILER_CONFIG.zoomOffset,
         minZoom: 1,
         maxZoom: MAPTILER_CONFIG.maxZoom,
         crossOrigin: true,
-        attribution: isVercelOrRemote
-          ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          : MAPTILER_ATTRIBUTION,
+        attribution: MAPTILER_ATTRIBUTION,
       });
 
       let hasFallenBack = false;
