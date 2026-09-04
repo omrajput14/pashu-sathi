@@ -84,16 +84,35 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
     // Retrieve MapTiler API Key from environment configuration
     const maptilerApiKey = getMapTilerApiKey();
 
+    const isVercelOrRemote =
+      typeof window !== 'undefined' &&
+      window.location &&
+      window.location.hostname &&
+      !['localhost', '127.0.0.1'].includes(window.location.hostname);
+
     if (!maptilerApiKey) {
       setIsKeyConfigured(false);
+      // Fallback to high-performance CARTO Voyager basemap if MapTiler API key is absent
+      const fallbackLayer = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        {
+          subdomains: 'abcd',
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        }
+      );
+      fallbackLayer.addTo(map);
+      tileLayerRef.current = fallbackLayer;
     } else {
       setIsKeyConfigured(true);
       let tileUrl = getMapTilerTileUrl(MAPTILER_CONFIG.defaultStyle, maptilerApiKey);
 
-      // In development or when accessed on a port/host other than localhost:3000,
-      // MapTiler rejects direct requests because the key is origin-restricted to localhost:3000.
-      // We route through the local Vite proxy to guarantee the allowed Referer header.
-      if (
+      // On Vercel or remote deployment hosts, MapTiler keys with localhost restrictions return HTTP 403
+      // watermarked tiles. We automatically route to CARTO Voyager for pristine, crystal-clear basemaps.
+      if (isVercelOrRemote) {
+        tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+      } else if (
         typeof window !== 'undefined' &&
         window.location &&
         window.location.port &&
@@ -103,12 +122,15 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
       }
 
       const tileLayer = L.tileLayer(tileUrl, {
-        tileSize: MAPTILER_CONFIG.tileSize,
-        zoomOffset: MAPTILER_CONFIG.zoomOffset,
+        subdomains: 'abcd',
+        tileSize: isVercelOrRemote ? 256 : MAPTILER_CONFIG.tileSize,
+        zoomOffset: isVercelOrRemote ? 0 : MAPTILER_CONFIG.zoomOffset,
         minZoom: 1,
         maxZoom: MAPTILER_CONFIG.maxZoom,
         crossOrigin: true,
-        attribution: MAPTILER_ATTRIBUTION,
+        attribution: isVercelOrRemote
+          ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          : MAPTILER_ATTRIBUTION,
       });
 
       let hasFallenBack = false;
