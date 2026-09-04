@@ -42,6 +42,25 @@ export const LoginPage: React.FC = () => {
     setError(null);
   };
 
+  const handleDirectLogin = async (id: string, pass: string) => {
+    setIdentifier(id);
+    setPassword(pass);
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await login({ identifier: id, password: pass });
+    } catch (err: any) {
+      const serverMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error?.message ||
+        (typeof err?.message === 'string' ? err.message : null) ||
+        'Authentication failed. If connected to campus Wi-Fi, the network firewall may block external APIs. Try again or switch to mobile hotspot.';
+      setError(serverMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-screen bg-[#F6F8FA] flex flex-col justify-between select-none">
       {/* Top Institutional Header */}
@@ -167,13 +186,22 @@ export const LoginPage: React.FC = () => {
                   <span className="text-[#101826] font-semibold">Chief Administrator:</span>
                   <div className="text-[#1E5C97]">admin@vetra.gov.in · Password@123</div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo('admin@vetra.gov.in', 'Password@123')}
-                  className="text-[10px] bg-[#E4EDF6] text-[#1E5C97] px-2 py-1 rounded font-semibold hover:bg-[#D4E4F3] transition-colors cursor-pointer"
-                >
-                  Fill
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleFillDemo('admin@vetra.gov.in', 'Password@123')}
+                    className="text-[10px] bg-[#F6F8FA] text-[#526074] border border-[#C7D0DB] px-2 py-1 rounded font-semibold hover:bg-[#E1E6EC] transition-colors cursor-pointer"
+                  >
+                    Fill
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDirectLogin('admin@vetra.gov.in', 'Password@123')}
+                    className="text-[10px] bg-[#1E5C97] text-white px-2.5 py-1 rounded font-semibold hover:bg-[#164877] transition-colors cursor-pointer shadow-sm"
+                  >
+                    Direct Login
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded border border-[#E1E6EC]">
@@ -181,13 +209,22 @@ export const LoginPage: React.FC = () => {
                   <span className="text-[#101826] font-semibold">Surveillance Officer:</span>
                   <div className="text-[#1E5C97]">officer@vetra.gov.in · Password@123</div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo('officer@vetra.gov.in', 'Password@123')}
-                  className="text-[10px] bg-[#E4EDF6] text-[#1E5C97] px-2 py-1 rounded font-semibold hover:bg-[#D4E4F3] transition-colors cursor-pointer"
-                >
-                  Fill
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleFillDemo('officer@vetra.gov.in', 'Password@123')}
+                    className="text-[10px] bg-[#F6F8FA] text-[#526074] border border-[#C7D0DB] px-2 py-1 rounded font-semibold hover:bg-[#E1E6EC] transition-colors cursor-pointer"
+                  >
+                    Fill
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDirectLogin('officer@vetra.gov.in', 'Password@123')}
+                    className="text-[10px] bg-[#1E5C97] text-white px-2.5 py-1 rounded font-semibold hover:bg-[#164877] transition-colors cursor-pointer shadow-sm"
+                  >
+                    Direct Login
+                  </button>
+                </div>
               </div>
             </div>
           </div>
