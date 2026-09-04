@@ -31,8 +31,8 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Brand & Geographic Scope */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 pr-4 border-r border-[#E1E6EC]">
-          <div className="w-7 h-7 bg-[#0E1A2B] rounded-[4px] flex items-center justify-center text-white overflow-hidden p-0.5">
-            <img src="/pashu-sathi-logo.png" alt="PASHU SATHI" className="w-full h-full object-contain" />
+          <div className="w-8 h-8 rounded-[6px] bg-white border border-[#E1E6EC] flex items-center justify-center overflow-hidden p-0.5 shadow-sm">
+            <img src="/pashu-sathi-icon.png" alt="PASHU SATHI" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 leading-none">

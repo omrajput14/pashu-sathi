@@ -47,8 +47,8 @@ export const LoginPage: React.FC = () => {
       {/* Top Institutional Header */}
       <header className="h-14 bg-[#0E1A2B] border-b border-[#1B2B40] px-6 flex items-center justify-between text-white">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-[#1E5C97] rounded-[4px] flex items-center justify-center overflow-hidden p-0.5">
-            <img src="/pashu-sathi-logo.png" alt="PASHU SATHI" className="w-full h-full object-contain" />
+          <div className="w-8 h-8 bg-white rounded-[6px] flex items-center justify-center overflow-hidden p-0.5 shadow-sm">
+            <img src="/pashu-sathi-icon.png" alt="PASHU SATHI" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-tight text-white leading-none">
@@ -68,6 +68,9 @@ export const LoginPage: React.FC = () => {
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[#FFFFFF] border border-[#E1E6EC] rounded-[6px] shadow-subtle p-6 sm:p-8">
           <div className="text-left mb-6">
+            <div className="flex items-center justify-center mb-4 pb-3 border-b border-[#E1E6EC]">
+              <img src="/pashu-sathi-logo.png" alt="PASHU SATHI" className="h-14 w-auto object-contain" />
+            </div>
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono uppercase bg-[#E4EDF6] text-[#1E5C97] rounded-[2px] font-semibold mb-2">
               Government Officer Sign-In
             </div>
