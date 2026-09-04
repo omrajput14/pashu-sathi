@@ -78,7 +78,7 @@ export const VaccinationIntelligencePage: React.FC<VaccinationIntelligencePagePr
       <div className="p-3.5 bg-[#F8FAFC] border border-[#BED2E8] rounded-[6px] text-xs font-mono text-[#526074] flex items-start gap-2.5">
         <Info className="w-4 h-4 text-[#1E5C97] shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <strong className="text-[#101826]">Epidemiological Methodological Note:</strong> Vaccination coverage reflects verified, non-expired clinical health records stored in the VETRA animal passport registry. Outbreak Risk is a spatial-temporal multi-signal index computed by the MultiSignalRiskEngine ($40\%$ cluster velocity, $20\%$ vector climate, $20\%$ endemic history, $20\%$ herd gap). Regional immunity deficit indicates vulnerability to pathogen propagation but does not alone predict localized clinical transmission without active field vector presence.
+          <strong className="text-[#101826]">Epidemiological Methodological Note:</strong> Vaccination coverage reflects verified, non-expired clinical health records stored in the PASHU SATHI animal passport registry. Outbreak Risk is a spatial-temporal multi-signal index computed by the MultiSignalRiskEngine ($40\%$ cluster velocity, $20\%$ vector climate, $20\%$ endemic history, $20\%$ herd gap). Regional immunity deficit indicates vulnerability to pathogen propagation but does not alone predict localized clinical transmission without active field vector presence.
         </div>
       </div>
     </div>

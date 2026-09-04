@@ -25,7 +25,7 @@ export const ProtocolsHeader: React.FC<ProtocolsHeaderProps> = ({
           </h1>
         </div>
         <p className="text-xs text-[#526074] mt-0.5 font-mono">
-          VETRA Disease Registry catalog, pathogen surveillance parameters, and departmental protocol reference.
+          PASHU SATHI Disease Registry catalog, pathogen surveillance parameters, and departmental protocol reference.
         </p>
       </div>
 

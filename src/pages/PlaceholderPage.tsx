@@ -21,7 +21,7 @@ export const PlaceholderPage: React.FC<PlaceholderPageProps> = ({
 
       <div className="inline-flex items-center gap-1 text-[11px] font-mono uppercase bg-[#F6F8FA] border border-[#E1E6EC] text-[#526074] px-2 py-0.5 rounded-[2px] mb-3">
         <Clock className="w-3 h-3" />
-        <span>VETRA Government Phase 2 Integration Module</span>
+        <span>PASHU SATHI Government Phase 2 Integration Module</span>
       </div>
 
       <h1 className="text-lg font-bold text-[#101826]">{title}</h1>

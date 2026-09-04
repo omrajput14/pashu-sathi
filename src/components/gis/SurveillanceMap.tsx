@@ -147,7 +147,7 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
     L.control
       .attribution({
         position: 'bottomright',
-        prefix: 'VETRA GIS · DataMeet · geoBoundaries',
+        prefix: 'PASHU SATHI GIS · DataMeet · geoBoundaries',
       })
       .addTo(map);
 

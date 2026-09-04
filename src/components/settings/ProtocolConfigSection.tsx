@@ -61,7 +61,7 @@ export const ProtocolConfigSection: React.FC = () => {
       </div>
 
       <div className="p-2 bg-[#FEF3E8] border border-[#FAD8B6] rounded text-[10px] font-mono text-[#D97B1F]">
-        <strong>Operational Safety:</strong> No simulated file uploads or placeholder documents are accepted. The VETRA system strictly prohibits fabricating statutory legal decrees.
+        <strong>Operational Safety:</strong> No simulated file uploads or placeholder documents are accepted. The PASHU SATHI system strictly prohibits fabricating statutory legal decrees.
       </div>
     </div>
   );

@@ -139,7 +139,7 @@ export const LaboratorySurveillancePage: React.FC<LaboratorySurveillancePageProp
           FAILED TO INGEST LABORATORY SURVEILLANCE TELEMETRY
         </h2>
         <p className="text-[#526074]">
-          {(reportsError as Error)?.message || 'An error occurred while communicating with the VETRA API gateway.'}
+          {(reportsError as Error)?.message || 'An error occurred while communicating with the PASHU SATHI API gateway.'}
         </p>
         <Button variant="primary" size="sm" onClick={() => refetch()} className="font-mono">
           <RefreshCw className="w-3.5 h-3.5 mr-1" />

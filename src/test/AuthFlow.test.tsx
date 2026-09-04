@@ -32,7 +32,7 @@ describe('Authentication Flow & Government Role Verification', () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText('VETRA GOVERNMENT COMMAND PORTAL')).toBeInTheDocument();
+    expect(screen.getByText('PASHU SATHI GOVERNMENT COMMAND PORTAL')).toBeInTheDocument();
     expect(screen.getByText('Surveillance Command Station')).toBeInTheDocument();
     expect(screen.getByLabelText(/Officer Identifier/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Security Password/i)).toBeInTheDocument();

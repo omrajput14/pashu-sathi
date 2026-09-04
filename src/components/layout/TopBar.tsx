@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, MapPin, Radio, LogOut, User, ChevronDown } from 'lucide-react';
+import { MapPin, Radio, LogOut, User, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
 import { OutbreakStatisticsResponse } from '../../core/types/outbreak.types';
 
@@ -31,15 +31,15 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Brand & Geographic Scope */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 pr-4 border-r border-[#E1E6EC]">
-          <div className="w-7 h-7 bg-[#0E1A2B] rounded-[4px] flex items-center justify-center text-white">
-            <ShieldAlert className="w-4 h-4 text-[#E4EDF6]" />
+          <div className="w-7 h-7 bg-[#0E1A2B] rounded-[4px] flex items-center justify-center text-white overflow-hidden p-0.5">
+            <img src="/pashu-sathi-logo.png" alt="PASHU SATHI" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-1.5 leading-none">
-              <span className="font-bold tracking-tight text-sm text-[#101826]">VETRA</span>
+              <span className="font-bold tracking-tight text-sm text-[#101826]">PASHU SATHI</span>
               <span className="text-[10px] uppercase font-mono px-1 py-0.5 bg-[#E4EDF6] text-[#1E5C97] rounded-[2px] font-semibold">GOV</span>
             </div>
-            <p className="text-[10px] text-[#526074] font-medium leading-tight">Epidemiological Surveillance</p>
+            <p className="text-[10px] text-[#526074] font-medium leading-tight">Government Animal Health &amp; Disease Surveillance</p>
           </div>
         </div>
 

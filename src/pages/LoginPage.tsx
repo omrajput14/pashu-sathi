@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Lock, User, AlertCircle, ArrowRight, KeyRound } from 'lucide-react';
+import { Lock, User, AlertCircle, ArrowRight, KeyRound } from 'lucide-react';
 import { useAuth } from '../core/context/AuthContext';
 import { Button } from '../components/ui/Button';
 
@@ -47,12 +47,12 @@ export const LoginPage: React.FC = () => {
       {/* Top Institutional Header */}
       <header className="h-14 bg-[#0E1A2B] border-b border-[#1B2B40] px-6 flex items-center justify-between text-white">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-[#1E5C97] rounded-[4px] flex items-center justify-center">
-            <ShieldAlert className="w-4 h-4 text-white" />
+          <div className="w-7 h-7 bg-[#1E5C97] rounded-[4px] flex items-center justify-center overflow-hidden p-0.5">
+            <img src="/pashu-sathi-logo.png" alt="PASHU SATHI" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-tight text-white leading-none">
-              VETRA GOVERNMENT COMMAND PORTAL
+              PASHU SATHI GOVERNMENT COMMAND PORTAL
             </h1>
             <p className="text-[10px] text-[#9FB1C4] font-mono leading-tight mt-0.5">
               Department of Animal Husbandry & Dairying (DAHD)
@@ -197,7 +197,7 @@ export const LoginPage: React.FC = () => {
 
       {/* Footer */}
       <footer className="py-3 px-6 text-center text-xs font-mono text-[#526074] border-t border-[#E1E6EC] bg-white">
-        VETRA National Animal Disease Surveillance System · Smart India Hackathon 2026
+        PASHU SATHI National Animal Disease Surveillance System · Smart India Hackathon 2026
       </footer>
     </div>
   );

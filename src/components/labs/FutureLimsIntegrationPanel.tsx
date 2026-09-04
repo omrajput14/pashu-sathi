@@ -38,7 +38,7 @@ export const FutureLimsIntegrationPanel: React.FC = () => {
             <h3 className="font-bold text-[#101826] text-xs">Specimen Accessioning</h3>
           </div>
           <p className="text-[11px] font-mono text-[#526074] leading-relaxed">
-            Barcode-driven chain of custody linking specimen sample tubes directly to VETRA Animal QR Passports and
+            Barcode-driven chain of custody linking specimen sample tubes directly to PASHU SATHI Animal QR Passports and
             field GPS coordinates.
           </p>
           <div className="text-[10px] font-mono text-[#1E5C97] pt-1">
@@ -98,7 +98,7 @@ export const FutureLimsIntegrationPanel: React.FC = () => {
           <Lock className="w-3.5 h-3.5 text-[#526074]" />
           <span>
             <strong>Compliance Constraint:</strong> External LIMS integration will adhere to ISO/IEC 17025 laboratory
-            data integrity standards. VETRA strictly avoids simulated test outputs.
+            data integrity standards. PASHU SATHI strictly avoids simulated test outputs.
           </span>
         </div>
         <span className="text-[#1E5C97] font-semibold flex items-center gap-0.5">

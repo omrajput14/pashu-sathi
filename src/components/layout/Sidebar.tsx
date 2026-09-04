@@ -38,10 +38,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, onRouteChange }) 
     >
       <div>
         {/* Navy Header / System Marker */}
-        <div className="h-14 px-4 flex items-center gap-2 border-b border-[#1B2B40]">
-          <span className="w-2 h-2 rounded-full bg-[#1E5C97]" />
+        <div className="h-14 px-4 flex items-center gap-2.5 border-b border-[#1B2B40]">
+          <img src="/pashu-sathi-logo.png" alt="PASHU SATHI" className="w-5 h-5 object-contain" />
           <span className="text-xs font-mono uppercase tracking-wider text-[#F4F7FA] font-semibold">
-            COMMAND STATION
+            PASHU SATHI
           </span>
         </div>
 

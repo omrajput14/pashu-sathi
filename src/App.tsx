@@ -115,7 +115,7 @@ const DashboardRoot: React.FC = () => {
     return (
       <div className="h-screen w-screen bg-[#F6F8FA] flex flex-col items-center justify-center font-mono text-xs text-[#526074]">
         <div className="w-8 h-8 border-2 border-[#1E5C97] border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="font-semibold text-[#101826]">INITIALIZING VETRA COMMAND TELEMETRY</p>
+        <p className="font-semibold text-[#101826]">INITIALIZING PASHU SATHI COMMAND TELEMETRY</p>
         <p className="text-[11px] text-[#93A1B0] mt-1">Verifying 256-bit JWT Security Session...</p>
       </div>
     );
@@ -137,7 +137,7 @@ const DashboardRoot: React.FC = () => {
             Restricted Government Terminal
           </h1>
           <p className="text-xs text-[#526074] mt-2 leading-relaxed">
-            Your account role (<strong className="font-mono text-[#101826]">{user?.role || 'UNKNOWN'}</strong>) is not authorized to access the VETRA Government Surveillance Command Center.
+            Your account role (<strong className="font-mono text-[#101826]">{user?.role || 'UNKNOWN'}</strong>) is not authorized to access the PASHU SATHI Government Surveillance Command Center.
           </p>
           <p className="text-[11px] text-[#93A1B0] mt-1">
             Access is strictly reserved for designated State/District Officers and System Administrators.

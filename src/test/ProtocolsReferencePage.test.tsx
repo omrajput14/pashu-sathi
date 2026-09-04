@@ -112,7 +112,7 @@ describe('ProtocolsReferencePage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('Unable to load the VETRA Disease Registry.')
+        screen.getByText('Unable to load the PASHU SATHI Disease Registry.')
       ).toBeInTheDocument();
       expect(
         screen.getByText('CONFIGURATION / DATA UNAVAILABLE')

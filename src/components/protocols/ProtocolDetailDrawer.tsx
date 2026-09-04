@@ -237,7 +237,7 @@ export const ProtocolDetailDrawer: React.FC<ProtocolDetailDrawerProps> = ({
 
             {protocol.surveillanceRadiusKm != null && (
               <div className="p-2 bg-white rounded border border-[#E1E6EC] text-[11px] font-mono text-[#526074]">
-                <strong className="text-[#101826]">Spatial Reference:</strong> VETRA surveillance engine evaluates an operational radius of ±{protocol.surveillanceRadiusKm.toFixed(0)} km.
+                <strong className="text-[#101826]">Spatial Reference:</strong> PASHU SATHI surveillance engine evaluates an operational radius of ±{protocol.surveillanceRadiusKm.toFixed(0)} km.
               </div>
             )}
           </div>

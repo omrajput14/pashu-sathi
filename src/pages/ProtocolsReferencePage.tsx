@@ -148,7 +148,7 @@ export const ProtocolsReferencePage: React.FC<ProtocolsReferencePageProps> = ({
               </Badge>
             </div>
             <h2 className="text-base font-bold font-mono text-[#101826]">
-              Unable to load the VETRA Disease Registry.
+              Unable to load the PASHU SATHI Disease Registry.
             </h2>
             <p className="text-xs text-[#526074] mt-1 font-mono max-w-lg mx-auto leading-relaxed">
               The backend Disease Registry Service (/api/v1/disease/registry) is currently unreachable or returned an error ({String(registryError)}). To maintain strict epidemiological data integrity, fallback parameters are not rendered.
