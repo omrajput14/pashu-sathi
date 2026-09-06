@@ -232,10 +232,15 @@ apiClient.interceptors.response.use(
       error.message?.includes('Network Error') ||
       error.message?.includes('timeout') ||
       error.response?.status === 0 ||
-      error.response?.status === 403 ||
+      // 403 Forbidden is a valid RBAC rejection and must not be masked as a network error
       error.response?.status === 502 ||
       error.response?.status === 503 ||
       isDemoMode();
+
+        // Phase 4A Strict Requirement: Never silently fall back to synthetic data for vaccination campaigns in production
+    if ((originalRequest?.url?.includes('/vaccination/campaigns') || originalRequest?.url?.includes('/dashboard/economic-impact')) && !isDemoMode()) {
+      return Promise.reject(error);
+    }
 
     if (isNetworkOrFirewallError && originalRequest?.url) {
       console.warn(`[PASHU SATHI Client] Live backend unreachable (Campus Firewall / Network). Engaging offline fallback for: ${originalRequest.url}`);

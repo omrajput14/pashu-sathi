@@ -19,23 +19,39 @@ import { OutbreakDossierDrawer } from '../components/gis/OutbreakDossierDrawer';
 import { CaseDetailDrawer } from '../components/gis/CaseDetailDrawer';
 import { OutbreakAccessibleListView } from '../components/gis/OutbreakAccessibleListView';
 import { Button } from '../components/ui/Button';
+import { isOutbreakInScope, isReportInScope, getScopeConfig, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
+import { Download, MapPin } from 'lucide-react';
 
 interface SurveillanceMapPageProps {
   onBackToOverview?: () => void;
   onNavigateToIntelligence?: (outbreakId: string) => void;
   initialSelectedOutbreakId?: string | null;
+  selectedScope?: string;
+  onScopeChange?: (scope: string) => void;
 }
 
 export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
   onBackToOverview,
   onNavigateToIntelligence,
   initialSelectedOutbreakId,
+  selectedScope,
+  onScopeChange,
 }) => {
   const [filters, setFilters] = useState<GisFilterState>(DEFAULT_GIS_FILTERS);
   const [viewMode, setViewMode] = useState<'map' | 'table'>('map');
   const [selectedOutbreak, setSelectedOutbreak] = useState<OutbreakResponse | null>(null);
   const [selectedReport, setSelectedReport] = useState<DiseaseReportResponse | null>(null);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
+  // Synchronize administrative scope from top bar with district filter
+  React.useEffect(() => {
+    if (!selectedScope || isStatewide(selectedScope)) {
+      setFilters((prev) => ({ ...prev, district: 'ALL' }));
+    } else {
+      const cfg = getScopeConfig(selectedScope);
+      setFilters((prev) => ({ ...prev, district: cfg.district }));
+    }
+  }, [selectedScope]);
+
 
   // 1. Fetch Outbreak Clusters from Backend
   const {
@@ -138,9 +154,10 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
     }
   }, [initialSelectedOutbreakId, allOutbreaks]);
 
-  // 6. Apply Client Filter Predicates to Outbreaks
+  // 6. Apply Client Filter Predicates to Outbreaks with Scope Filtering
   const filteredOutbreaks = useMemo(() => {
     return allOutbreaks.filter((o) => {
+      if (selectedScope && !isOutbreakInScope(o, selectedScope)) return false;
       if (filters.disease !== 'ALL' && o.diseaseName !== filters.disease) return false;
       if (filters.riskLevel !== 'ALL' && o.riskScore !== filters.riskLevel) return false;
       if (filters.status !== 'ALL' && o.status !== filters.status) return false;
@@ -157,6 +174,13 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
   // 6b. Apply Filter Predicates to AI Screenings
   const filteredAiScreenings = useMemo(() => {
     return rawAiScreenings.filter((s) => {
+      if (selectedScope && !isStatewide(selectedScope)) {
+        const sc = getScopeConfig(selectedScope);
+        const sDist = (s.district || '').toLowerCase();
+        const sTal = (s.taluka || '').toLowerCase();
+        const matchesScope = sc.keywords.some(kw => sDist.includes(kw) || sTal.includes(kw));
+        if (!matchesScope && sDist !== sc.district.toLowerCase()) return false;
+      }
       if (filters.disease !== 'ALL' && s.preliminaryDiagnosis !== filters.disease) return false;
       if (filters.district !== 'ALL' && s.district !== filters.district) return false;
       if (filters.searchQuery.trim()) {
@@ -174,6 +198,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
   const filteredReports = useMemo(() => {
     const rawReports = reportsPage?.content || [];
     return rawReports.filter((r) => {
+      if (selectedScope && !isReportInScope(r, selectedScope)) return false;
       if (filters.disease !== 'ALL' && r.diseaseName !== filters.disease) return false;
       if (filters.diagnosisStatus !== 'ALL' && r.diagnosisStatus !== filters.diagnosisStatus)
         return false;
@@ -258,6 +283,48 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
             </button>
           </div>
 
+          {selectedScope && !isStatewide(selectedScope) && (
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-[#E4EDF6] text-[#1E5C97] border border-[#BED2E8] rounded-[4px] text-xs font-mono">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>Scope: <strong>{selectedScope}</strong> ({filteredOutbreaks.length} Clusters)</span>
+              {onScopeChange && (
+                <button
+                  onClick={() => onScopeChange('Maharashtra (Statewide)')}
+                  className="ml-1.5 text-[10px] underline font-bold hover:text-[#101826]"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          )}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              downloadCsv(
+                'PashuSathi_GIS_Outbreaks_' + (selectedScope || 'Statewide').replace(/\s+/g, '_'),
+                ['Outbreak ID', 'Disease Name', 'Severity', 'Risk Score', 'Composite Score', 'Latitude', 'Longitude', 'Radius (km)', 'Affected Cases', 'Status'],
+                filteredOutbreaks.map((o) => [
+                  o.id,
+                  o.diseaseName,
+                  o.severity,
+                  o.riskScore,
+                  o.compositeRiskScore ?? '',
+                  o.centerLatitude,
+                  o.centerLongitude,
+                  o.radiusKm,
+                  o.affectedReportsCount,
+                  o.status,
+                ])
+              );
+            }}
+            className="font-mono text-xs text-[#526074]"
+          >
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            <span>Export GIS (CSV)</span>
+          </Button>
+
           <Button
             variant="secondary"
             size="sm"
@@ -312,6 +379,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
               onSelectOutbreak={(o) => setSelectedOutbreak(o)}
               onSelectReport={(r) => setSelectedReport(r)}
               height="620px"
+              scope={selectedScope}
             />
           )}
         </div>

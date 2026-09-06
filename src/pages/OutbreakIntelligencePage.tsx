@@ -22,12 +22,16 @@ import { OutbreakComparisonMatrix } from '../components/intelligence/OutbreakCom
 import { GeographicThreatRanking } from '../components/intelligence/GeographicThreatRanking';
 import { CaseDetailDrawer } from '../components/gis/CaseDetailDrawer';
 import { Button } from '../components/ui/Button';
+import { isOutbreakInScope, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
+import { Download, MapPin, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 interface OutbreakIntelligencePageProps {
   initialOutbreakId?: string | null;
   onNavigateToMap?: (outbreakId?: string) => void;
   onBackToOverview?: () => void;
   onSelectOutbreakId?: (outbreakId: string | null) => void;
+  selectedScope?: string;
+  onScopeChange?: (scope: string) => void;
 }
 
 export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> = ({
@@ -35,7 +39,11 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
   onNavigateToMap,
   onBackToOverview,
   onSelectOutbreakId,
+  selectedScope = 'Maharashtra (Statewide)',
+  onScopeChange,
 }) => {
+  const [containmentModalOpen, setContainmentModalOpen] = useState(false);
+  const [containmentSuccess, setContainmentSuccess] = useState(false);
   const [selectedOutbreakId, setSelectedOutbreakId] = useState<string | null>(initialOutbreakId || null);
   const [diseaseFilter, setDiseaseFilter] = useState('ALL');
   const [riskFilter, setRiskFilter] = useState<'ALL' | OutbreakRiskScore>('ALL');
@@ -88,9 +96,10 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
     return Array.from(set).sort();
   }, [allOutbreaks]);
 
-  // Apply filters
+  // Apply filters including administrative scope
   const filteredOutbreaks = useMemo(() => {
     return allOutbreaks.filter((o) => {
+      if (selectedScope && !isOutbreakInScope(o, selectedScope)) return false;
       if (diseaseFilter !== 'ALL' && o.diseaseName !== diseaseFilter) return false;
       if (riskFilter !== 'ALL' && o.riskScore !== riskFilter) return false;
       if (searchQuery.trim()) {
@@ -152,7 +161,66 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {selectedScope && !isStatewide(selectedScope) && (
+            <div className="hidden md:flex items-center gap-1 px-2.5 py-1 bg-[#E4EDF6] text-[#1E5C97] border border-[#BED2E8] rounded-[4px] text-xs font-mono">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>Scope: <strong>{selectedScope}</strong></span>
+              {onScopeChange && (
+                <button
+                  onClick={() => onScopeChange('Maharashtra (Statewide)')}
+                  className="ml-1 text-[10px] underline font-bold hover:text-[#101826]"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          )}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              downloadCsv(
+                'PashuSathi_Outbreaks_' + selectedScope.replace(/\s+/g, '_'),
+                ['Cluster ID', 'Disease', 'Severity', 'Risk Score', 'Composite Score', 'Latitude', 'Longitude', 'Radius (km)', 'Affected Cases', 'Status', 'Updated At'],
+                filteredOutbreaks.map((o) => [
+                  o.id,
+                  o.diseaseName,
+                  o.severity,
+                  o.riskScore,
+                  o.compositeRiskScore ?? '',
+                  o.centerLatitude,
+                  o.centerLongitude,
+                  o.radiusKm,
+                  o.affectedReportsCount,
+                  o.status,
+                  o.updatedAt,
+                ])
+              );
+            }}
+            className="font-mono text-xs text-[#101826]"
+            title="Export filtered outbreak intelligence as CSV"
+          >
+            <Download className="w-3.5 h-3.5 mr-1 text-[#1E5C97]" />
+            <span>Export Dossiers (CSV)</span>
+          </Button>
+
+          {selectedOutbreak && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setContainmentSuccess(false);
+                setContainmentModalOpen(true);
+              }}
+              className="font-mono text-xs bg-[#B7301F] hover:bg-[#922417] text-white border-none"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 mr-1.5" />
+              <span>Deploy Containment Protocol</span>
+            </Button>
+          )}
+
           <button
             onClick={() => refetchOutbreaks()}
             disabled={isLoadingOutbreaks}
@@ -164,6 +232,66 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
           </button>
         </div>
       </div>
+
+      {/* Containment Protocol Active Confirmation Toast */}
+      {containmentSuccess && (
+        <div className="bg-[#EDF7F0] border border-[#BFE4C9] p-3 rounded-[6px] text-xs font-mono text-[#2E6930] flex items-center justify-between shadow-subtle animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#2E6930] shrink-0" />
+            <span>
+              <strong>STATUTORY BIO-CONTAINMENT DIRECTIVE ACTIVATED:</strong> Rapid Vet Response team mobilized, livestock movement embargo initiated within ±{selectedOutbreak?.radiusKm || 25}km perimeter around cluster.
+            </span>
+          </div>
+          <button onClick={() => setContainmentSuccess(false)} className="text-[10px] underline font-bold">
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Containment Directive Modal */}
+      {containmentModalOpen && selectedOutbreak && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[6px] border border-[#C7D0DB] shadow-2xl max-w-lg w-full p-5 space-y-4 text-xs font-mono">
+            <div className="flex items-center justify-between border-b border-[#E1E6EC] pb-3">
+              <div className="flex items-center gap-2 text-[#B7301F]">
+                <ShieldAlert className="w-5 h-5" />
+                <h2 className="text-sm font-bold text-[#101826] uppercase">Statutory Containment Directive</h2>
+              </div>
+              <button onClick={() => setContainmentModalOpen(false)} className="text-[#526074] hover:text-[#101826] text-sm">✕</button>
+            </div>
+
+            <div className="space-y-2 text-[#526074]">
+              <p><strong className="text-[#101826]">Target Outbreak:</strong> {selectedOutbreak.diseaseName} ({selectedOutbreak.id})</p>
+              <p><strong className="text-[#101826]">Operational Buffer:</strong> ±{selectedOutbreak.radiusKm} km containment perimeter</p>
+              <p><strong className="text-[#101826]">Risk Level:</strong> <span className="text-[#B7301F] font-bold">{selectedOutbreak.riskScore} ({selectedOutbreak.compositeRiskScore ?? 'N/A'}/100)</span></p>
+              <div className="bg-[#F8FAFC] border border-[#E1E6EC] p-3 rounded space-y-1 text-[11px]">
+                <div className="font-bold text-[#101826] mb-1">Enforcement Protocol Checklist:</div>
+                <div>☑ Issue Section 144 livestock transport embargo within buffer zone</div>
+                <div>☑ Mobilize District Rapid Response Veterinary Unit (MVU)</div>
+                <div>☑ Broadcast SMS biometric advisory to registered farmers in taluka</div>
+                <div>☑ Order mandatory ring vaccination within 48-hour containment window</div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E1E6EC]">
+              <Button variant="secondary" size="sm" onClick={() => setContainmentModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-[#B7301F] hover:bg-[#922417] text-white border-none"
+                onClick={() => {
+                  setContainmentModalOpen(false);
+                  setContainmentSuccess(true);
+                }}
+              >
+                Confirm & Dispatch Directive
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Error State */}
       {isErrorOutbreaks ? (

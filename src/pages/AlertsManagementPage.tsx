@@ -4,17 +4,22 @@ import { diseaseService } from '../core/api/diseaseService';
 import { AlertsFilterBar } from '../components/alerts/AlertsFilterBar';
 import { OperationalAlertCard } from '../components/alerts/OperationalAlertCard';
 import { OperationalPriorityQueueCard } from '../components/alerts/OperationalPriorityQueueCard';
-import { Siren, RefreshCw, AlertTriangle, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Siren, RefreshCw, AlertTriangle, ShieldAlert, ShieldCheck, Download, MapPin } from 'lucide-react';
+import { isAlertInScope, isOutbreakInScope, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
 import { Button } from '../components/ui/Button';
 
 interface AlertsManagementPageProps {
   onNavigateToOutbreak?: (outbreakId: string) => void;
   onNavigateToMap?: () => void;
+  selectedScope?: string;
+  onScopeChange?: (scope: string) => void;
 }
 
 export const AlertsManagementPage: React.FC<AlertsManagementPageProps> = ({
   onNavigateToOutbreak,
   onNavigateToMap,
+  selectedScope = 'Maharashtra (Statewide)',
+  onScopeChange,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSeverity, setSelectedSeverity] = useState('ALL');
@@ -39,9 +44,10 @@ export const AlertsManagementPage: React.FC<AlertsManagementPageProps> = ({
     refetchInterval: 30000,
   });
 
-  // Filtered Alerts
+  // Filtered Alerts with scope
   const filteredAlerts = useMemo(() => {
     return alerts.filter((a) => {
+      if (selectedScope && !isAlertInScope(a, selectedScope)) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchTitle = a.title.toLowerCase().includes(q);
@@ -61,6 +67,30 @@ export const AlertsManagementPage: React.FC<AlertsManagementPageProps> = ({
       return true;
     });
   }, [alerts, searchQuery, selectedSeverity, selectedEventType]);
+
+
+  const scopedOutbreaks = useMemo(() => {
+    return outbreaks.filter((o) => isOutbreakInScope(o, selectedScope));
+  }, [outbreaks, selectedScope]);
+
+  const handleExportAlerts = () => {
+    const rows = filteredAlerts.map((a) => [
+      a.id,
+      a.title,
+      a.severity,
+      a.eventType,
+      a.diseaseName,
+      a.locationName,
+      a.compositeRiskScore ?? '',
+      a.status,
+      a.detectedAt || '',
+    ]);
+    downloadCsv(
+      'PashuSathi_Operational_Alerts_' + selectedScope.replace(/\s+/g, '_'),
+      ['Alert ID', 'Title', 'Severity', 'Event Type', 'Disease', 'Location', 'Composite Risk', 'Status', 'Triggered At'],
+      rows
+    );
+  };
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -89,7 +119,33 @@ export const AlertsManagementPage: React.FC<AlertsManagementPageProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedScope && !isStatewide(selectedScope) && (
+            <div className="hidden md:flex items-center gap-1 px-2.5 py-1 bg-[#E4EDF6] text-[#1E5C97] border border-[#BED2E8] rounded-[4px] text-xs font-mono">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>Scope: <strong>{selectedScope}</strong> ({filteredAlerts.length} Alerts)</span>
+              {onScopeChange && (
+                <button
+                  onClick={() => onScopeChange('Maharashtra (Statewide)')}
+                  className="ml-1 text-[10px] underline font-bold hover:text-[#101826]"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          )}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportAlerts}
+            className="font-mono text-xs text-[#101826]"
+            title="Export filtered alerts sitrep as CSV"
+          >
+            <Download className="w-3.5 h-3.5 mr-1 text-[#1E5C97]" />
+            <span>Export Alerts (CSV)</span>
+          </Button>
+
           <Button
             variant="secondary"
             size="sm"
@@ -152,7 +208,7 @@ export const AlertsManagementPage: React.FC<AlertsManagementPageProps> = ({
 
       {/* Operational Priority Queue */}
       <OperationalPriorityQueueCard
-        outbreaks={outbreaks}
+        outbreaks={scopedOutbreaks}
         onSelectOutbreak={onNavigateToOutbreak}
       />
 

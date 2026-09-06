@@ -2,17 +2,19 @@ import React from 'react';
 import { ZoneVaccinationGapDto } from '../../core/types/vaccination.types';
 import { RiskBadge } from '../ui/RiskBadge';
 import { OutbreakRiskScore } from '../../core/theme/tokens';
-import { MapPin, ArrowRight, ShieldAlert } from 'lucide-react';
+import { MapPin, ArrowRight, ShieldAlert, Syringe } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 interface ZoneVaccinationGapTableProps {
   zones: ZoneVaccinationGapDto[];
   onSelectOutbreak?: (outbreakId: string) => void;
+  onLaunchRingCampaign?: (zone: ZoneVaccinationGapDto) => void;
 }
 
 export const ZoneVaccinationGapTable: React.FC<ZoneVaccinationGapTableProps> = ({
   zones,
   onSelectOutbreak,
+  onLaunchRingCampaign,
 }) => {
   if (!zones || zones.length === 0) {
     return (
@@ -55,8 +57,7 @@ export const ZoneVaccinationGapTable: React.FC<ZoneVaccinationGapTableProps> = (
             {zones.map((zone) => (
               <tr
                 key={zone.outbreakId}
-                onClick={() => onSelectOutbreak?.(zone.outbreakId)}
-                className="hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+                className="hover:bg-[#F8FAFC] transition-colors"
               >
                 {/* Zone Name */}
                 <td className="py-2.5 px-3 font-bold text-[#101826] max-w-[200px] truncate">
@@ -102,19 +103,27 @@ export const ZoneVaccinationGapTable: React.FC<ZoneVaccinationGapTableProps> = (
                 </td>
 
                 {/* Action */}
-                <td className="py-2.5 px-3 text-right">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectOutbreak?.(zone.outbreakId);
-                    }}
-                    className="font-mono text-[11px] py-1 px-2"
-                  >
-                    <span>View Cluster</span>
-                    <ArrowRight className="w-3 h-3 ml-1 text-[#1E5C97]" />
-                  </Button>
+                <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => onLaunchRingCampaign?.(zone)}
+                      className="font-mono text-[11px] py-1 px-2 bg-[#1E5C97] text-white hover:bg-[#154370]"
+                    >
+                      <Syringe className="w-3 h-3 mr-1 text-white" />
+                      <span>Launch Ring</span>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => onSelectOutbreak?.(zone.outbreakId)}
+                      className="font-mono text-[11px] py-1 px-2"
+                    >
+                      <span>View Cluster</span>
+                      <ArrowRight className="w-3 h-3 ml-1 text-[#1E5C97]" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}

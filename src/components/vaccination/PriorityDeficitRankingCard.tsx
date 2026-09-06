@@ -1,17 +1,19 @@
 import React from 'react';
 import { PriorityImmunityDeficitZoneDto } from '../../core/types/vaccination.types';
 import { Badge } from '../ui/Badge';
-import { ArrowRight, Siren } from 'lucide-react';
+import { ArrowRight, Siren, Syringe } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 interface PriorityDeficitRankingCardProps {
   priorityZones: PriorityImmunityDeficitZoneDto[];
   onSelectOutbreak?: (outbreakId: string) => void;
+  onLaunchRingCampaign?: (zone: PriorityImmunityDeficitZoneDto) => void;
 }
 
 export const PriorityDeficitRankingCard: React.FC<PriorityDeficitRankingCardProps> = ({
   priorityZones,
   onSelectOutbreak,
+  onLaunchRingCampaign,
 }) => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
@@ -81,7 +83,16 @@ export const PriorityDeficitRankingCard: React.FC<PriorityDeficitRankingCardProp
               </div>
             </div>
 
-            <div className="shrink-0 self-end md:self-center">
+            <div className="shrink-0 self-end md:self-center flex items-center gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => onLaunchRingCampaign?.(zone)}
+                className="font-mono text-xs whitespace-nowrap bg-[#1E5C97] text-white hover:bg-[#154370]"
+              >
+                <Syringe className="w-3.5 h-3.5 mr-1 text-white" />
+                <span>Launch Ring Campaign</span>
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"

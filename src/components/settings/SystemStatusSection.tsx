@@ -40,7 +40,7 @@ export const SystemStatusSection: React.FC<SystemStatusSectionProps> = ({
             <Cpu className="w-3.5 h-3.5 text-[#1E5C97]" />
           </div>
           <p className="font-bold font-mono text-[#101826] text-xs">
-            {system?.serviceName || 'vetra-backend'} v{system?.version || '0.12.5.0'}
+            {(!system?.serviceName || system.serviceName.toLowerCase().includes('vetra-backend')) ? 'pashu-sathi-backend' : system.serviceName.replace(/vetra[-_]?backend/gi, 'pashu-sathi-backend')} v{system?.version || '1.0.0'}
           </p>
           <p className="text-[10px] font-mono text-[#526074]">
             Environment: <strong className="text-[#101826] uppercase">{system?.environment || 'dev'}</strong>

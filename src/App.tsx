@@ -164,6 +164,8 @@ const DashboardRoot: React.FC = () => {
           <CommandOverviewPage
             onNavigateToMap={() => navigateTo('surveillance-map')}
             onSelectOutbreak={handleSelectOutbreakFromOverview}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'surveillance-map':
@@ -172,6 +174,8 @@ const DashboardRoot: React.FC = () => {
             onBackToOverview={() => navigateTo('overview')}
             initialSelectedOutbreakId={inspectedParamId}
             onNavigateToIntelligence={(id) => navigateTo('outbreaks', id)}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'outbreaks':
@@ -187,6 +191,8 @@ const DashboardRoot: React.FC = () => {
                 window.history.pushState(null, '', url);
               }
             }}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'analytics':
@@ -194,6 +200,8 @@ const DashboardRoot: React.FC = () => {
           <EpidemiologicalAnalyticsPage
             onNavigateToOutbreak={(id) => navigateTo('outbreaks', id)}
             onBackToOverview={() => navigateTo('overview')}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'reports':
@@ -202,12 +210,16 @@ const DashboardRoot: React.FC = () => {
             inspectedReportId={inspectedParamId}
             onNavigateToOutbreak={(id) => navigateTo('outbreaks', id)}
             onNavigateToMap={() => navigateTo('surveillance-map')}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'vaccination':
         return (
           <VaccinationIntelligencePage
             onNavigateToOutbreak={(id) => navigateTo('outbreaks', id)}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'alerts':
@@ -215,6 +227,8 @@ const DashboardRoot: React.FC = () => {
           <AlertsManagementPage
             onNavigateToOutbreak={(id) => navigateTo('outbreaks', id)}
             onNavigateToMap={() => navigateTo('surveillance-map')}
+            selectedScope={selectedScope}
+            onScopeChange={setSelectedScope}
           />
         );
       case 'labs':

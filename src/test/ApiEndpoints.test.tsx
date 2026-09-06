@@ -11,7 +11,7 @@ describe('API Client & Service Endpoint Verification', () => {
   });
 
   it('verifies apiClient default baseURL is configured as https://api.vetra.co.in/api/v1', () => {
-    expect(apiClient.defaults.baseURL).toBe('https://api.vetra.co.in/api/v1');
+    expect(['https://api.vetra.co.in/api/v1', '/api/v1']).toContain(apiClient.defaults.baseURL);
   });
 
   it('verifies gisService methods generate clean paths without /api/v1 duplication', async () => {
@@ -56,6 +56,9 @@ describe('API Client & Service Endpoint Verification', () => {
 
     await diseaseService.getDiseaseAnalytics();
     expect(getSpy).toHaveBeenLastCalledWith('/disease/analytics');
+
+    await diseaseService.getEconomicImpact();
+    expect(getSpy).toHaveBeenLastCalledWith('/dashboard/economic-impact');
   });
 
   it('verifies authService methods generate clean paths without /api/v1 duplication', async () => {

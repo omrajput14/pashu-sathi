@@ -16,6 +16,8 @@ export const OperationalAlertCard: React.FC<OperationalAlertCardProps> = ({
   onNavigateToMap,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [isAcknowledged, setIsAcknowledged] = useState(false);
+  const [isEscalated, setIsEscalated] = useState(false);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -166,10 +168,45 @@ export const OperationalAlertCard: React.FC<OperationalAlertCardProps> = ({
       {/* Action Deep-Links */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E1E6EC]">
         <span className="text-[10px] font-mono text-[#526074]">
-          Status: <strong className="text-[#101826]">{alert.status}</strong> · Requires Officer Review
+          Status: <strong className="text-[#101826]">{isAcknowledged ? 'ACKNOWLEDGED' : alert.status}</strong>
+          {isEscalated ? ' · Directive Issued to District Collector' : isAcknowledged ? ' · Officer Reviewed' : ' · Requires Officer Review'}
         </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {!isAcknowledged ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsAcknowledged(true)}
+              className="font-mono text-[11px] text-[#2E6930] hover:bg-[#EDF7F0] border-[#BFE4C9]"
+            >
+              <Check className="w-3.5 h-3.5 mr-1" />
+              <span>Acknowledge</span>
+            </Button>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#2E6930] font-bold bg-[#EDF7F0] px-2 py-1 rounded border border-[#BFE4C9]">
+              <Check className="w-3 h-3" />
+              ACKNOWLEDGED
+            </span>
+          )}
+
+          {!isEscalated ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsEscalated(true)}
+              className="font-mono text-[11px] text-[#B7301F] hover:bg-[#FBEBEB] border-[#F5C2C7]"
+            >
+              <Siren className="w-3.5 h-3.5 mr-1" />
+              <span>Escalate</span>
+            </Button>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#B7301F] font-bold bg-[#FBEBEB] px-2 py-1 rounded border border-[#F5C2C7]">
+              <Siren className="w-3 h-3" />
+              ESCALATED TO COLLECTOR
+            </span>
+          )}
+
           {alert.relatedOutbreakId && onNavigateToOutbreak && (
             <Button
               variant="secondary"

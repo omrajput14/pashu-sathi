@@ -16,6 +16,7 @@ import {
   MAPTILER_ATTRIBUTION,
 } from '../../core/config/maptiler';
 import { Locate, Maximize2, RotateCcw, AlertTriangle, Info } from 'lucide-react';
+import { getScopeConfig, isStatewide } from '../../core/utils/scopeFilter';
 
 interface SurveillanceMapProps {
   outbreaks: OutbreakResponse[];
@@ -30,6 +31,7 @@ interface SurveillanceMapProps {
   onSelectReport?: (report: DiseaseReportResponse) => void;
   height?: string;
   isCompact?: boolean;
+  scope?: string;
 }
 
 // Maharashtra State Reference Center & Bounding Box
@@ -50,6 +52,7 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
   onSelectReport,
   height = '100%',
   isCompact = false,
+  scope,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -60,6 +63,27 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
   const [currentZoom, setCurrentZoom] = useState<number>(isCompact ? 6 : DEFAULT_ZOOM);
   const [isKeyConfigured, setIsKeyConfigured] = useState<boolean>(true);
   const [basemapUnavailable, setBasemapUnavailable] = useState<boolean>(false);
+
+  // Auto-pan / fly map viewport when administrative scope changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    if (scope && !isStatewide(scope)) {
+      const config = getScopeConfig(scope);
+      if (typeof map.flyTo === 'function') {
+        map.flyTo(config.center, config.zoom, { duration: 1.2 });
+      } else if (typeof map.setView === 'function') {
+        map.setView(config.center, config.zoom);
+      }
+    } else if (scope && isStatewide(scope)) {
+      const initialZoom = isCompact ? 6 : DEFAULT_ZOOM;
+      if (typeof map.flyTo === 'function') {
+        map.flyTo(MAHARASHTRA_CENTER, initialZoom, { duration: 1.0 });
+      } else if (typeof map.setView === 'function') {
+        map.setView(MAHARASHTRA_CENTER, initialZoom);
+      }
+    }
+  }, [scope, isCompact]);
 
   // 1. Initialize Leaflet Map Instance with MapTiler Basemap
   useEffect(() => {

@@ -24,6 +24,9 @@ export interface OutbreakResponse {
   centerLongitude: number;
   radiusKm: number;
   affectedReportsCount: number;
+  mortalityCount?: number;
+  vetConfirmedMortalityCount?: number;
+  farmerReportedMortalityCount?: number;
   evaluationWindowHours: number;
   lastCaseReportedAt: string;
   createdAt: string;
@@ -37,4 +40,6 @@ export interface OutbreakStatisticsResponse {
   activeOutbreaks: number;
   resolvedOutbreaks: number;
   highRiskOutbreaks: number;
+  totalMortalities?: number;
+  vetConfirmedMortalities?: number;
 }

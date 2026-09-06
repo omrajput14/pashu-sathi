@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient';
 import { ApiResponse } from '../types/auth.types';
 import { OutbreakResponse, OutbreakStatisticsResponse } from '../types/outbreak.types';
-import { DiseaseAnalyticsResponse } from '../types/analytics.types';
+import { DiseaseAnalyticsResponse, EconomicImpactResponse } from '../types/analytics.types';
 import { AIScreeningResponse, DiseaseMetadata, DiseaseReportResponse, Page } from '../types/disease.types';
 import { VaccinationAnalyticsResponse } from '../types/vaccination.types';
 import { OperationalAlertResponse } from '../types/alerts.types';
@@ -87,6 +87,11 @@ export const diseaseService = {
 
   async getAIScreeningById(id: string): Promise<AIScreeningResponse> {
     const response = await apiClient.get<ApiResponse<AIScreeningResponse>>(`/disease/ai-screenings/${id}`);
+    return response.data.data;
+  },
+
+  async getEconomicImpact(): Promise<EconomicImpactResponse> {
+    const response = await apiClient.get<ApiResponse<EconomicImpactResponse>>('/dashboard/economic-impact');
     return response.data.data;
   },
 };

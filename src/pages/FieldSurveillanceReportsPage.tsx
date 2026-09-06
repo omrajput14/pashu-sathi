@@ -6,16 +6,23 @@ import { FieldReportsFilterBar } from '../components/reports/FieldReportsFilterB
 import { FieldReportsLedgerTable } from '../components/reports/FieldReportsLedgerTable';
 import { AIScreeningsLedgerTable } from '../components/reports/AIScreeningsLedgerTable';
 import { CaseDetailDrawer } from '../components/gis/CaseDetailDrawer';
-import { FileSpreadsheet, RefreshCw, Sparkles, Activity } from 'lucide-react';
+import { FileSpreadsheet, RefreshCw, Sparkles, Activity, Download, MapPin } from 'lucide-react';
+import { isReportInScope, isStatewide, getScopeConfig, downloadCsv } from '../core/utils/scopeFilter';
 import { Button } from '../components/ui/Button';
 
 interface FieldSurveillanceReportsPageProps {
   inspectedReportId?: string | null;
   onNavigateToOutbreak?: (outbreakId: string) => void;
   onNavigateToMap?: () => void;
+  selectedScope?: string;
+  onScopeChange?: (scope: string) => void;
 }
 
-export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPageProps> = () => {
+export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPageProps> = ({
+  inspectedReportId,
+  selectedScope = 'Maharashtra (Statewide)',
+  onScopeChange,
+}) => {
   const [activeTab, setActiveTab] = useState<'clinical' | 'ai_screenings'>('clinical');
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -24,6 +31,9 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedConfidence, setSelectedConfidence] = useState('ALL');
   const [selectedReport, setSelectedReport] = useState<DiseaseReportResponse | null>(null);
+
+
+
 
   // 1. Fetch paginated clinical disease reports
   const {
@@ -36,6 +46,14 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
     queryFn: () => diseaseService.listReports(currentPage, pageSize, 'createdAt,desc'),
     refetchInterval: 30000,
   });
+
+  // Auto-select inspected report when provided via navigation
+  React.useEffect(() => {
+    if (inspectedReportId && pageData?.content) {
+      const match = pageData.content.find((r) => r.id === inspectedReportId);
+      if (match) setSelectedReport(match);
+    }
+  }, [inspectedReportId, pageData]);
 
   // 2. Fetch paginated AI preliminary screenings
   const {
@@ -67,6 +85,9 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
   const filteredPageData = useMemo(() => {
     if (!pageData) return undefined;
     const content = pageData.content.filter((r) => {
+      if (selectedScope && !isReportInScope(r, selectedScope)) {
+        return false;
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchId = r.id.toLowerCase().includes(q);
@@ -104,6 +125,13 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
   const filteredAIPageData = useMemo(() => {
     if (!aiPageData) return undefined;
     const content = aiPageData.content.filter((s) => {
+      if (selectedScope && !isStatewide(selectedScope)) {
+        const sc = getScopeConfig(selectedScope);
+        const sDist = (s.district || '').toLowerCase();
+        const sTal = (s.taluka || '').toLowerCase();
+        const matches = sc.keywords.some((kw) => sDist.includes(kw) || sTal.includes(kw)) || sDist === sc.district.toLowerCase();
+        if (!matches) return false;
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchId = s.id.toLowerCase().includes(q);
@@ -138,6 +166,46 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
 
   const handleSelectReport = (report: DiseaseReportResponse) => {
     setSelectedReport(report);
+  };
+
+
+  const handleExportCsv = () => {
+    if (activeTab === 'clinical') {
+      const rows = (filteredPageData?.content || []).map((r) => [
+        r.id,
+        r.tagNumber || '',
+        r.diseaseName,
+        r.diagnosisStatus,
+        r.diagnosisConfidenceSource,
+        r.reportedByName || '',
+        r.latitude || '',
+        r.longitude || '',
+        r.notes || '',
+        r.createdAt,
+      ]);
+      downloadCsv(
+        'PashuSathi_Clinical_Reports_' + selectedScope.replace(/\s+/g, '_'),
+        ['Report ID', 'Animal Tag', 'Disease Name', 'Status', 'Confidence Source', 'Reporter', 'Latitude', 'Longitude', 'Clinical Notes', 'Reported At'],
+        rows
+      );
+    } else {
+      const rows = (filteredAIPageData?.content || []).map((s) => [
+        s.id,
+        s.tagNumber || '',
+        s.species || '',
+        s.preliminaryDiagnosis,
+        s.confidenceScore ? `${(s.confidenceScore * 100).toFixed(1)}%` : '',
+        s.district || '',
+        s.taluka || '',
+        s.status || '',
+        s.createdAt,
+      ]);
+      downloadCsv(
+        'PashuSathi_AI_Screenings_' + selectedScope.replace(/\s+/g, '_'),
+        ['Scan ID', 'Animal Tag', 'Species', 'Preliminary Diagnosis', 'Confidence', 'District', 'Taluka', 'Verification Status', 'Screened At'],
+        rows
+      );
+    }
   };
 
   const isRefetching = activeTab === 'clinical' ? isRefetchingReports : isRefetchingAI;
@@ -209,6 +277,32 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
               )}
             </button>
           </div>
+
+          {selectedScope && !isStatewide(selectedScope) && (
+            <div className="hidden md:flex items-center gap-1 px-2.5 py-1 bg-[#E4EDF6] text-[#1E5C97] border border-[#BED2E8] rounded-[4px] text-xs font-mono">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span>Scope: <strong>{selectedScope}</strong></span>
+              {onScopeChange && (
+                <button
+                  onClick={() => onScopeChange('Maharashtra (Statewide)')}
+                  className="ml-1 text-[10px] underline font-bold hover:text-[#101826]"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          )}
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportCsv}
+            className="font-mono text-xs text-[#101826]"
+            title="Export filtered reports as CSV"
+          >
+            <Download className="w-3.5 h-3.5 mr-1 text-[#1E5C97]" />
+            <span>Export CSV</span>
+          </Button>
 
           <Button
             variant="secondary"

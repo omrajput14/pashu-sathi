@@ -66,7 +66,7 @@ export const FourSignalRiskDecomposition: React.FC<FourSignalRiskDecompositionPr
               </div>
 
               <p className="text-xs text-[#526074] leading-relaxed">
-                Spatial-temporal density based on {outbreak.affectedReportsCount} contributing field reports within {outbreak.radiusKm} km containment radius over a {outbreak.evaluationWindowHours ?? 72}h rolling evaluation window.
+                Spatial-temporal density based on {outbreak.affectedReportsCount} contributing field reports{outbreak.mortalityCount != null && outbreak.mortalityCount > 0 ? ` and ${outbreak.mortalityCount} animal mortality events (${outbreak.vetConfirmedMortalityCount ?? 0} vet-confirmed, ${outbreak.farmerReportedMortalityCount ?? 0} farmer-reported)` : ''} within {outbreak.radiusKm} km containment radius over a {outbreak.evaluationWindowHours ?? 72}h rolling evaluation window.
               </p>
             </div>
 

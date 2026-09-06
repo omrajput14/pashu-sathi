@@ -9,4 +9,21 @@ export interface DiseaseAnalyticsResponse {
   diseaseDistribution: Record<string, number>;
   mostCommonDiseases: string[];
   reportsByConfidenceSource: Record<DiagnosisConfidenceSource, number>;
+  totalMortalityReports?: number;
+  farmerReportedMortalityCount?: number;
+  vetConfirmedMortalityCount?: number;
+}
+
+export interface EconomicImpactResponse {
+  modeledSavings: number | null;
+  formattedValue: string | null;
+  unit: string;
+  label: string;
+  isModeled: boolean;
+  hasSufficientData: boolean;
+  eligibleAnimalsCount: number;
+  statusMessage: string;
+  methodology: string;
+  methodologyVersion: string;
+  scope: string;
 }
