@@ -6,7 +6,7 @@ import { FieldReportsFilterBar } from '../components/reports/FieldReportsFilterB
 import { FieldReportsLedgerTable } from '../components/reports/FieldReportsLedgerTable';
 import { AIScreeningsLedgerTable } from '../components/reports/AIScreeningsLedgerTable';
 import { CaseDetailDrawer } from '../components/gis/CaseDetailDrawer';
-import { FileSpreadsheet, RefreshCw, Sparkles, Activity, Download, MapPin } from 'lucide-react';
+import { FileSpreadsheet, RefreshCw, Sparkles, Activity, Download, MapPin, AlertTriangle } from 'lucide-react';
 import { isReportInScope, isStatewide, getScopeConfig, downloadCsv } from '../core/utils/scopeFilter';
 import { Button } from '../components/ui/Button';
 
@@ -60,6 +60,7 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
     data: aiPageData,
     isLoading: isLoadingAI,
     isRefetching: isRefetchingAI,
+    isError: isErrorAI,
     refetch: refetchAI,
   } = useQuery({
     queryKey: ['aiScreeningsPage', currentPage, pageSize],
@@ -392,17 +393,28 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
           onSelectReport={handleSelectReport}
         />
       ) : (
-        <AIScreeningsLedgerTable
-          pageData={filteredAIPageData}
-          isLoading={isLoadingAI}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={(newSize) => {
-            setPageSize(newSize);
-            setCurrentPage(0);
-          }}
-        />
+        isErrorAI ? (
+          <div className="bg-white border border-[#F5C2C7] rounded-[6px] p-10 flex flex-col items-center justify-center gap-3 font-mono text-xs text-[#B7301F] shadow-subtle">
+            <AlertTriangle className="w-8 h-8 text-[#B7301F]" />
+            <strong className="text-sm">Failed to Load AI Preliminary Screening Telemetry</strong>
+            <p className="text-[#526074]">Live surveillance backend connection timed out or is unavailable.</p>
+            <Button size="sm" onClick={() => refetchAI()}>
+              Retry Telemetry Ingestion
+            </Button>
+          </div>
+        ) : (
+          <AIScreeningsLedgerTable
+            pageData={filteredAIPageData}
+            isLoading={isLoadingAI}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(0);
+            }}
+          />
+        )
       )}
 
       {/* Case Detail Inspection Drawer */}

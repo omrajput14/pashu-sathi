@@ -79,7 +79,11 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
   });
 
   // 2b. Fetch AI Preliminary Screenings for GIS Point Overlays
-  const { data: rawAiScreenings = [], refetch: refetchAiScreenings } = useQuery({
+  const {
+    data: rawAiScreenings = [],
+    isError: isErrorAiScreenings,
+    refetch: refetchAiScreenings,
+  } = useQuery({
     queryKey: ['aiScreenings'],
     queryFn: () => gisService.getAIScreenings(),
     refetchInterval: 30000,
@@ -331,6 +335,24 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* AI Preliminary Screenings Error Banner */}
+      {filters.showAiScreenings && isErrorAiScreenings && (
+        <div className="bg-[#FFF4F2] border border-[#F5C2C7] rounded-[4px] px-3.5 py-2.5 text-xs font-mono text-[#B7301F] flex items-center justify-between shadow-subtle">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-[#B7301F]" />
+            <span>AI Preliminary Screening telemetry failed to ingest. Live preliminary markers unavailable.</span>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => refetchAiScreenings()}
+            className="text-xs text-[#B7301F] hover:bg-[#FEE2E2]"
+          >
+            Retry Telemetry
+          </Button>
+        </div>
+      )}
 
       {/* GIS Operational Filter Bar with Dynamically Sourced Districts */}
       <GisFilterBar
