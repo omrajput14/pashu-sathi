@@ -19,7 +19,7 @@ import { OutbreakDossierDrawer } from '../components/gis/OutbreakDossierDrawer';
 import { CaseDetailDrawer } from '../components/gis/CaseDetailDrawer';
 import { OutbreakAccessibleListView } from '../components/gis/OutbreakAccessibleListView';
 import { Button } from '../components/ui/Button';
-import { isOutbreakInScope, isReportInScope, getScopeConfig, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
+import { isOutbreakInScope, isReportInScope, isScreeningInScope, getScopeConfig, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
 import { Download, MapPin } from 'lucide-react';
 
 interface SurveillanceMapPageProps {
@@ -72,14 +72,14 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
   });
 
   // 2. Fetch Recent Surveillance Reports for Point Overlays
-  const { data: reportsPage } = useQuery({
+  const { data: reportsPage, refetch: refetchReports } = useQuery({
     queryKey: ['gisReports'],
     queryFn: () => gisService.getRecentReports(0, 100),
     refetchInterval: 30000,
   });
 
   // 2b. Fetch AI Preliminary Screenings for GIS Point Overlays
-  const { data: rawAiScreenings = [] } = useQuery({
+  const { data: rawAiScreenings = [], refetch: refetchAiScreenings } = useQuery({
     queryKey: ['aiScreenings'],
     queryFn: () => gisService.getAIScreenings(),
     refetchInterval: 30000,
@@ -174,13 +174,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
   // 6b. Apply Filter Predicates to AI Screenings
   const filteredAiScreenings = useMemo(() => {
     return rawAiScreenings.filter((s) => {
-      if (selectedScope && !isStatewide(selectedScope)) {
-        const sc = getScopeConfig(selectedScope);
-        const sDist = (s.district || '').toLowerCase();
-        const sTal = (s.taluka || '').toLowerCase();
-        const matchesScope = sc.keywords.some(kw => sDist.includes(kw) || sTal.includes(kw));
-        if (!matchesScope && sDist !== sc.district.toLowerCase()) return false;
-      }
+      if (selectedScope && !isScreeningInScope(s, selectedScope)) return false;
       if (filters.disease !== 'ALL' && s.preliminaryDiagnosis !== filters.disease) return false;
       if (filters.district !== 'ALL' && s.district !== filters.district) return false;
       if (filters.searchQuery.trim()) {
@@ -328,7 +322,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => refetchOutbreaks()}
+            onClick={() => { refetchOutbreaks(); refetchReports(); refetchAiScreenings(); }}
             className="font-mono text-xs text-[#526074]"
             title="Force refresh live telemetry"
           >

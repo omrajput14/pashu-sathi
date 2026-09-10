@@ -15,6 +15,7 @@ import {
   mockVaccinationAnalytics,
   mockOperationalAlerts,
   mockSystemConfiguration,
+  mockAIScreenings,
 } from './mockData';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.vetra.co.in/api/v1';
@@ -85,6 +86,21 @@ export function getMockResponseForUrl(url: string, _method = 'get', postData?: a
   }
   if (cleanUrl.includes('/disease/analytics')) {
     return mockDiseaseAnalytics;
+  }
+  if (cleanUrl.includes('/disease/ai-screenings')) {
+    if (cleanUrl.includes('/page')) {
+      return {
+        content: mockAIScreenings,
+        totalElements: mockAIScreenings.length,
+        totalPages: 1,
+        size: 20,
+        number: 0,
+        first: true,
+        last: true,
+        empty: false,
+      };
+    }
+    return mockAIScreenings;
   }
   if (cleanUrl.includes('/disease/reports')) {
     return {

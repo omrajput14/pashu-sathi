@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, RefreshCw, Map as MapIcon, Maximize2, Download, MapPin, Clock } from 'lucide-react';
-import { isOutbreakInScope, isReportInScope, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
+import { isOutbreakInScope, isReportInScope, isScreeningInScope, isStatewide, downloadCsv } from '../core/utils/scopeFilter';
 import { OutbreakStatisticsResponse } from '../core/types/outbreak.types';
 import { diseaseService } from '../core/api/diseaseService';
+import { gisService } from '../core/api/gisService';
 import { KpiStrip } from '../components/overview/KpiStrip';
 import { PriorityAlertRail } from '../components/overview/PriorityAlertRail';
 import { RecentSurveillanceTable } from '../components/overview/RecentSurveillanceTable';
@@ -86,12 +87,23 @@ export const CommandOverviewPage: React.FC<CommandOverviewPageProps> = ({
     refetchInterval: 60000,
   });
 
+  // Query 6: AI Preliminary Screenings for map layer
+  const {
+    data: rawAiScreenings = [],
+    refetch: refetchAiScreenings,
+  } = useQuery({
+    queryKey: ['aiScreenings'],
+    queryFn: () => gisService.getAIScreenings(),
+    refetchInterval: 30000,
+  });
+
   const handleRefreshAll = () => {
     refetchStats();
     refetchOutbreaks();
     refetchAnalytics();
     refetchReports();
     refetchEconomic();
+    refetchAiScreenings();
   };
 
   const handleOutbreakClick = (outbreak: OutbreakResponse) => {
@@ -137,6 +149,11 @@ export const CommandOverviewPage: React.FC<CommandOverviewPageProps> = ({
     const raw = reportsPage?.content || [];
     return raw.filter((r) => isReportInScope(r, selectedScope));
   }, [reportsPage, selectedScope]);
+
+  // Filter AI preliminary screenings by scope
+  const scopedAiScreenings = React.useMemo(() => {
+    return rawAiScreenings.filter((s) => isScreeningInScope(s, selectedScope));
+  }, [rawAiScreenings, selectedScope]);
 
   const scopedReportsPage = React.useMemo(() => {
     if (!reportsPage) return undefined;
@@ -315,6 +332,7 @@ export const CommandOverviewPage: React.FC<CommandOverviewPageProps> = ({
             <SurveillanceMap
               outbreaks={filteredOutbreaks}
               reports={scopedReports}
+              aiScreenings={scopedAiScreenings}
               scope={selectedScope}
               filters={DEFAULT_GIS_FILTERS}
               selectedOutbreakId={selectedOutbreakId}
