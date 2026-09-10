@@ -180,7 +180,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
     return rawAiScreenings.filter((s) => {
       if (selectedScope && !isScreeningInScope(s, selectedScope)) return false;
       if (filters.disease !== 'ALL' && s.preliminaryDiagnosis !== filters.disease) return false;
-      if (filters.district !== 'ALL' && s.district !== filters.district) return false;
+      if (filters.district !== 'ALL' && s.district?.toLowerCase() !== filters.district.toLowerCase()) return false;
       if (filters.searchQuery.trim()) {
         const query = filters.searchQuery.toLowerCase();
         const matchDisease = s.preliminaryDiagnosis.toLowerCase().includes(query);
@@ -190,7 +190,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
       }
       return true;
     });
-  }, [rawAiScreenings, filters]);
+  }, [rawAiScreenings, filters, selectedScope]);
 
   // 7. Apply Client Filter Predicates to Field Reports
   const filteredReports = useMemo(() => {

@@ -413,6 +413,22 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
       group.addLayer(marker);
     });
 
+    // Track coordinate frequency to subtly disperse overlapping markers
+    const coordOccupancy = new Map<string, number>();
+    const getDispersedCoord = (lat: number, lng: number): [number, number] => {
+      const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+      const count = coordOccupancy.get(key) || 0;
+      coordOccupancy.set(key, count + 1);
+      if (count === 0) return [lat, lng];
+
+      // Subtle radial dispersal (approx 350m - 700m offset on map)
+      const angle = count * 1.05;
+      const radius = 0.0035 + Math.floor(count / 6) * 0.002;
+      const offsetLat = Math.sin(angle) * radius;
+      const offsetLng = Math.cos(angle) * (radius / Math.cos((lat * Math.PI) / 180));
+      return [lat + offsetLat, lng + offsetLng];
+    };
+
     // B. Render Individual Confirmed & Suspected Field Cases
     reports.forEach((report) => {
       if (!report.latitude || !report.longitude) return;
@@ -432,7 +448,8 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
         iconAnchor: [7, 7],
       });
 
-      const caseMarker = L.marker([report.latitude, report.longitude], {
+      const [caseLat, caseLng] = getDispersedCoord(report.latitude, report.longitude);
+      const caseMarker = L.marker([caseLat, caseLng], {
         icon: caseIcon,
         zIndexOffset: isConfirmed ? 200 : 100,
       });
@@ -473,9 +490,10 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
           iconAnchor: [7, 7],
         });
 
-        const aiMarker = L.marker([screening.latitude, screening.longitude], {
+        const [aiLat, aiLng] = getDispersedCoord(screening.latitude, screening.longitude);
+        const aiMarker = L.marker([aiLat, aiLng], {
           icon: aiIcon,
-          zIndexOffset: 150,
+          zIndexOffset: 300,
         });
 
         aiMarker.bindTooltip(
