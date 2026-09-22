@@ -8,7 +8,7 @@ import {
   GeoJsonFeatureCollection,
   AdministrativeFeatureProperties,
 } from '../../core/types/gis.types';
-import { getRiskToken } from '../../core/theme/tokens';
+import { resolveRiskToken } from '../../core/theme/tokens';
 import {
   getMapTilerApiKey,
   getMapTilerTileUrl,
@@ -337,8 +337,13 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
     // A. Render Outbreak Clusters & Risk Buffer Perimeters
     outbreaks.forEach((outbreak) => {
       const isSelected = outbreak.id === selectedOutbreakId;
-      const riskTokens = getRiskToken(outbreak.riskScore);
       const hasNumericScore = outbreak.compositeRiskScore !== null && outbreak.compositeRiskScore !== undefined;
+      // Colour follows the same number shown in the badge, so a 71 can never be
+      // rendered greener than a 67 sitting next to it.
+      const riskTokens = resolveRiskToken({
+        level: outbreak.riskScore,
+        score: outbreak.compositeRiskScore,
+      });
       const scoreBadgeText = hasNumericScore
         ? `${outbreak.compositeRiskScore}`
         : (outbreak.riskScore ? outbreak.riskScore.substring(0, 4) : '—');
@@ -356,7 +361,7 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
         });
 
         circle.bindTooltip(
-          `<strong>${outbreak.diseaseName}</strong><br/>Risk Level: ${outbreak.riskScore}${hasNumericScore ? ` (${outbreak.compositeRiskScore}/100)` : ''}<br/>Radius: ±${outbreak.radiusKm} km<br/>Cases: ${outbreak.affectedReportsCount}`,
+          `<strong>${outbreak.diseaseName}</strong><br/>Risk Level: ${riskTokens.label}${hasNumericScore ? ` (${outbreak.compositeRiskScore}/100)` : ''}<br/>Radius: ±${outbreak.radiusKm} km<br/>Cases: ${outbreak.affectedReportsCount}`,
           { className: 'font-mono text-xs' }
         );
 
@@ -397,7 +402,7 @@ export const SurveillanceMap: React.FC<SurveillanceMapProps> = ({
           <div class="flex items-center justify-between gap-2 mb-1 border-b border-[#E1E6EC] pb-1">
             <span class="font-bold text-[#101826]">${outbreak.diseaseName}</span>
             <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" style="background-color: ${riskTokens.bg}; color: ${riskTokens.color}">
-              ${outbreak.riskScore}${hasNumericScore ? ` (${outbreak.compositeRiskScore})` : ''}
+              ${riskTokens.label}${hasNumericScore ? ` (${outbreak.compositeRiskScore})` : ''}
             </span>
           </div>
           <p class="text-[11px] text-[#526074]">Affected Cases: <strong class="text-[#101826]">${outbreak.affectedReportsCount}</strong></p>
