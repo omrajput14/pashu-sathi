@@ -13,6 +13,8 @@ import { diseaseService } from '../core/api/diseaseService';
 import { OutbreakResponse, OutbreakRiskScore, OutbreakStatus } from '../core/types/outbreak.types';
 import { DiseaseReportResponse } from '../core/types/disease.types';
 import { RISK_CONFIG } from '../core/theme/tokens';
+import { useDataFreshness } from '../core/hooks/useDataFreshness';
+import { DataFreshnessBanner } from '../components/ui/DataFreshnessBanner';
 import { OutbreakHeaderCard } from '../components/intelligence/OutbreakHeaderCard';
 import { FourSignalRiskDecomposition } from '../components/intelligence/FourSignalRiskDecomposition';
 import { ConfirmedVsSuspectedAnalysis } from '../components/intelligence/ConfirmedVsSuspectedAnalysis';
@@ -59,16 +61,21 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
   }, [initialOutbreakId]);
 
   // 1. Fetch All Active / Filtered Outbreak Clusters
+  const outbreaksQuery = useQuery({
+    queryKey: ['intelligenceOutbreaks', statusFilter],
+    queryFn: () => gisService.getOutbreaks(statusFilter === 'ALL' ? undefined : statusFilter),
+    refetchInterval: 30000,
+  });
   const {
     data: allOutbreaks = [],
     isLoading: isLoadingOutbreaks,
     isError: isErrorOutbreaks,
     refetch: refetchOutbreaks,
-  } = useQuery({
-    queryKey: ['intelligenceOutbreaks', statusFilter],
-    queryFn: () => gisService.getOutbreaks(statusFilter === 'ALL' ? undefined : statusFilter),
-    refetchInterval: 30000,
-  });
+  } = outbreaksQuery;
+
+  // Only the cluster list polls; the detail and report queries below are gated on
+  // a selection and are not expected to refresh on their own.
+  const freshness = useDataFreshness([outbreaksQuery]);
 
   // 2. Fetch Selected Outbreak Details (if selected)
   const {
@@ -129,6 +136,8 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
 
   return (
     <div className="space-y-5" data-testid="outbreak-intelligence-page">
+      <DataFreshnessBanner freshness={freshness} subject="outbreak intelligence" />
+
       {/* Top Header Command Strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-[#E1E6EC] rounded-[6px] px-4 py-3 shadow-subtle">
         <div className="flex items-center gap-3">

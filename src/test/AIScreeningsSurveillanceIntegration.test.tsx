@@ -32,6 +32,7 @@ vi.mock('../core/api/diseaseService', () => ({
     listReports: vi.fn(),
     getEconomicImpact: vi.fn(),
     listAIScreenings: vi.fn(),
+    listAIScreeningsPaginated: vi.fn(),
   },
 }));
 
@@ -163,7 +164,20 @@ describe('AI Preliminary Signal GIS Surveillance Integration', () => {
     });
     vi.mocked(diseaseService.listReports).mockResolvedValue(mockEmptyReportsPage);
     vi.mocked(diseaseService.getEconomicImpact).mockResolvedValue(null as any);
-    const getAIScreeningsMock = vi.mocked(gisService.getAIScreenings).mockResolvedValue([mockDhuleUterineProlapseScan]);
+    // Overview reads the AI screening layer through the PAGINATED endpoint so the
+    // payload stays bounded; the unpaginated list is no longer used by this page.
+    const listAIScreeningsPaginatedMock = vi
+      .mocked(diseaseService.listAIScreeningsPaginated)
+      .mockResolvedValue({
+        content: [mockDhuleUterineProlapseScan],
+        totalElements: 1,
+        totalPages: 1,
+        size: 50,
+        number: 0,
+        first: true,
+        last: true,
+        empty: false,
+      });
 
     const markerSpy = vi.spyOn(L, 'marker');
 
@@ -177,8 +191,10 @@ describe('AI Preliminary Signal GIS Surveillance Integration', () => {
       expect(screen.getByText(/Live PostGIS Surveillance Map/i)).toBeInTheDocument();
     });
 
-    // Verify AI screenings were queried on the Command Overview page
-    expect(getAIScreeningsMock).toHaveBeenCalled();
+    // Verify AI screenings were queried on the Command Overview page, via the
+    // bounded paginated endpoint rather than the single-shot list.
+    expect(listAIScreeningsPaginatedMock).toHaveBeenCalled();
+    expect(gisService.getAIScreenings).not.toHaveBeenCalled();
 
     // Verify AI marker is positioned at Dhule coordinates on the embedded map
     await waitFor(() => {

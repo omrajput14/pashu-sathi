@@ -13,6 +13,8 @@ import { gisService } from '../core/api/gisService';
 import { OutbreakResponse } from '../core/types/outbreak.types';
 import { DiseaseReportResponse } from '../core/types/disease.types';
 import { DEFAULT_GIS_FILTERS, GisFilterState } from '../core/types/gis.types';
+import { useDataFreshness } from '../core/hooks/useDataFreshness';
+import { DataFreshnessBanner } from '../components/ui/DataFreshnessBanner';
 import { GisFilterBar } from '../components/gis/GisFilterBar';
 import { SurveillanceMap } from '../components/gis/SurveillanceMap';
 import { OutbreakDossierDrawer } from '../components/gis/OutbreakDossierDrawer';
@@ -54,12 +56,7 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
 
 
   // 1. Fetch Outbreak Clusters from Backend
-  const {
-    data: allOutbreaks = [],
-    isLoading: isLoadingOutbreaks,
-    isError: isErrorOutbreaks,
-    refetch: refetchOutbreaks,
-  } = useQuery({
+  const outbreaksQuery = useQuery({
     queryKey: ['gisOutbreaks', filters.status],
     queryFn: async () => {
       const data = await gisService.getOutbreaks(
@@ -70,24 +67,36 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
     },
     refetchInterval: 30000,
   });
+  const {
+    data: allOutbreaks = [],
+    isLoading: isLoadingOutbreaks,
+    isError: isErrorOutbreaks,
+    refetch: refetchOutbreaks,
+  } = outbreaksQuery;
 
   // 2. Fetch Recent Surveillance Reports for Point Overlays
-  const { data: reportsPage, refetch: refetchReports } = useQuery({
+  const reportsQuery = useQuery({
     queryKey: ['gisReports'],
     queryFn: () => gisService.getRecentReports(0, 100),
     refetchInterval: 30000,
   });
+  const { data: reportsPage, refetch: refetchReports } = reportsQuery;
 
   // 2b. Fetch AI Preliminary Screenings for GIS Point Overlays
-  const {
-    data: rawAiScreenings = [],
-    isError: isErrorAiScreenings,
-    refetch: refetchAiScreenings,
-  } = useQuery({
+  const aiScreeningsQuery = useQuery({
     queryKey: ['aiScreenings'],
     queryFn: () => gisService.getAIScreenings(),
     refetchInterval: 30000,
   });
+  const {
+    data: rawAiScreenings = [],
+    isError: isErrorAiScreenings,
+    refetch: refetchAiScreenings,
+  } = aiScreeningsQuery;
+
+  // Only the polling layers below count toward freshness. The heatmap is toggle-gated,
+  // and boundaries/districts use staleTime: Infinity as static geometry.
+  const freshness = useDataFreshness([outbreaksQuery, reportsQuery, aiScreeningsQuery]);
 
   // 3. Fetch Spatial Heatmap KDE Points (if toggled)
   const { data: heatmapPoints = [] } = useQuery({
@@ -220,6 +229,8 @@ export const SurveillanceMapPage: React.FC<SurveillanceMapPageProps> = ({
 
   return (
     <div className="space-y-4" data-testid="surveillance-map-page">
+      <DataFreshnessBanner freshness={freshness} subject="GIS surveillance" />
+
       {/* Top Page Command Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-[#E1E6EC] rounded-[6px] px-4 py-3 shadow-subtle">
         <div className="flex items-center gap-3">
