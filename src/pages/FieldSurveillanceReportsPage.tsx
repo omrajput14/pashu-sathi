@@ -225,11 +225,20 @@ export const FieldSurveillanceReportsPage: React.FC<FieldSurveillanceReportsPage
   };
 
   // KPIs derived from actual backend records
+  const { data: analytics } = useQuery({
+    queryKey: ['diseaseAnalytics'],
+    queryFn: () => diseaseService.getDiseaseAnalytics(),
+  });
+  const { data: allAiScreenings = [] } = useQuery({
+    queryKey: ['aiScreeningsAll'],
+    queryFn: () => diseaseService.listAIScreenings(),
+  });
   const allReports = pageData?.content || [];
-  const confirmedCount = allReports.filter((r) => r.diagnosisStatus === 'CONFIRMED').length;
-  const suspectedCount = allReports.filter((r) => r.diagnosisStatus === 'SUSPECTED').length;
-  const aiScreenings = aiPageData?.content || [];
-  const pendingAiCount = aiScreenings.filter((s) => !s.veterinarianVerified).length;
+  const byStatus = analytics?.reportsByDiagnosisStatus;
+  const confirmedCount = byStatus?.CONFIRMED ?? allReports.filter((r) => r.diagnosisStatus === 'CONFIRMED').length;
+  const suspectedCount = byStatus?.SUSPECTED ?? allReports.filter((r) => r.diagnosisStatus === 'SUSPECTED').length;
+  // Waiting for a decision: not yet field-checked, or escalated and waiting for a vet.
+  const pendingAiCount = allAiScreenings.filter((s) => s.status === 'COMPLETED' || s.status === 'ESCALATED').length;
 
   return (
     <div className="space-y-4 select-none pb-12">
