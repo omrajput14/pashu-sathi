@@ -8,6 +8,7 @@ import { useDataFreshness } from '../core/hooks/useDataFreshness';
 import { DataFreshnessBanner } from '../components/ui/DataFreshnessBanner';
 import { KpiStrip } from '../components/overview/KpiStrip';
 import { PriorityAlertRail } from '../components/overview/PriorityAlertRail';
+import { AITriageFunnel } from '../components/overview/AITriageFunnel';
 import { RecentSurveillanceTable } from '../components/overview/RecentSurveillanceTable';
 import { SurveillanceMap } from '../components/gis/SurveillanceMap';
 import { OutbreakResponse } from '../core/types/outbreak.types';
@@ -297,6 +298,8 @@ export const CommandOverviewPage: React.FC<CommandOverviewPageProps> = ({
         isLoading={isLoadingStats || isLoadingAnalytics || isLoadingEconomic}
       />
 
+      <AITriageFunnel />
+
       {/* 2. Split Main Operations: Live GIS Surface (65%) & Priority Alert Rail (35%) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
         <div className="lg:col-span-8 flex flex-col bg-white border border-[#E1E6EC] rounded-[6px] shadow-subtle overflow-hidden">
@@ -308,7 +311,7 @@ export const CommandOverviewPage: React.FC<CommandOverviewPageProps> = ({
                 Live PostGIS Surveillance Map
               </h2>
               <span className="text-[10px] font-mono bg-[#E4EDF6] text-[#1E5C97] px-1.5 py-0.5 rounded-[2px] font-bold">
-                {filteredOutbreaks.length} Active Clusters
+                {filteredOutbreaks.filter((o) => o.status !== 'RESOLVED').length} Active · {filteredOutbreaks.length} Total
               </span>
             </div>
 
