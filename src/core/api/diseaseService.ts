@@ -13,6 +13,7 @@ export interface ContainmentResult {
   campaignNote: string;
   farmersNotified: number;
   vetsNotified: number;
+  paraVetsNotified: number;
   radiusKm: number;
 }
 

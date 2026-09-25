@@ -8,6 +8,7 @@ import {
   Syringe,
   AlertTriangle,
   BookOpen,
+  Users,
   Settings,
 } from 'lucide-react';
 
@@ -25,6 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, onRouteChange }) 
     { id: 'reports', label: 'Reports', icon: FileSpreadsheet },
     { id: 'vaccination', label: 'Vaccination', icon: Syringe },
     { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
+    { id: 'workforce', label: 'Field Workforce', icon: Users },
     { id: 'protocols', label: 'Protocols', icon: BookOpen },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];

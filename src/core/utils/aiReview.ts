@@ -32,3 +32,41 @@ export const AI_REVIEW_BADGE: Record<AiReviewTone, string> = {
   confirmed: 'bg-[#EDF7F0] text-[#1B806A] border-[#C2E7DA]',
   rejected: 'bg-[#FBEBEB] text-[#B7301F] border-[#F5C2C7]',
 };
+
+/** One step in how a case was reviewed. */
+export interface ReviewStep {
+  label: string;
+  detail?: string;
+  tone: AiReviewTone | 'ai' | 'report';
+}
+
+/**
+ * How a case got its status: AI reading -> para-vet field check -> vet decision for AI-scan cases,
+ * or who reported it for field reports. "Confirmed" only ever comes from a vet.
+ */
+export function reviewSteps(
+  report: { aiScanId: string | null; diagnosisStatus: string; reportedByName?: string | null; reportSource?: string | null },
+  scan?: AIScreeningResponse,
+): ReviewStep[] {
+  if (!report.aiScanId || !scan) {
+    const who = report.reportedByName || 'field user';
+    const steps: ReviewStep[] = [
+      { label: report.reportSource === 'VETERINARIAN' ? `Vet report: ${who}` : `Reported by ${who}`, tone: 'report' },
+    ];
+    if (report.diagnosisStatus === 'CONFIRMED') steps.push({ label: 'Confirmed', tone: 'confirmed' });
+    return steps;
+  }
+  const pct = scan.confidenceScore != null ? ` ${Math.round(Number(scan.confidenceScore) * 100)}%` : '';
+  const steps: ReviewStep[] = [{ label: `AI${pct}`, detail: scan.preliminaryDiagnosis, tone: 'ai' }];
+  if (scan.triagedByName) {
+    steps.push({ label: `Field-checked by ${scan.triagedByName}`, detail: scan.triageNotes ?? undefined, tone: 'escalated' });
+  }
+  if (scan.status === 'VERIFIED') {
+    steps.push({ label: `Confirmed by ${scan.verifiedByVetName || 'a vet'}`, tone: 'confirmed' });
+  } else if (scan.status === 'REJECTED') {
+    steps.push({ label: `Ruled out by ${scan.verifiedByVetName || 'a vet'}`, detail: scan.reviewNotes ?? undefined, tone: 'rejected' });
+  } else if (scan.status === 'ESCALATED') {
+    steps.push({ label: 'Waiting for a vet', tone: 'pending' });
+  }
+  return steps;
+}

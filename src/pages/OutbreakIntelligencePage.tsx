@@ -269,7 +269,7 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
               <strong>CONTAINMENT DEPLOYED:</strong> {containmentResult.campaignNote}
               {containmentResult.campaignName ? ` (${containmentResult.campaignName})` : ''} Advisory pushed to{' '}
               {containmentResult.farmersNotified} farmer(s) within ±{Math.round(containmentResult.radiusKm)} km and{' '}
-              {containmentResult.vetsNotified} vet(s) within 50 km.
+              {containmentResult.vetsNotified} vet(s) within 50 km; {containmentResult.paraVetsNotified ?? 0} para-vet(s) called to run the vaccination drive.
             </span>
           </div>
           <button onClick={() => setContainmentResult(null)} className="text-[10px] underline font-bold">
@@ -299,6 +299,7 @@ export const OutbreakIntelligencePage: React.FC<OutbreakIntelligencePageProps> =
                 <div>1. Launch a ring-vaccination campaign for this outbreak (or reuse the one already open)</div>
                 <div>2. Push an advisory to every registered farmer within ±{selectedOutbreak.radiusKm} km</div>
                 <div>3. Push a containment notice to vets within 50 km</div>
+                <div>4. Call approved para-vets nearby to run the drive and record each dose</div>
               </div>
               <label className="flex items-center justify-between gap-2 text-[11px]">
                 <span className="text-[#101826] font-bold">Planned vaccine doses</span>
