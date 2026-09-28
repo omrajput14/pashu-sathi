@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './core/context/AuthContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { LoginPage } from './pages/LoginPage';
+import { WelcomeSplash } from './pages/WelcomeSplash';
 import { CommandOverviewPage } from './pages/CommandOverviewPage';
 import { SurveillanceMapPage } from './pages/SurveillanceMapPage';
 import { OutbreakIntelligencePage } from './pages/OutbreakIntelligencePage';
@@ -78,6 +79,11 @@ const DashboardRoot: React.FC = () => {
   const [activeRoute, setActiveRoute] = useState(initial.route);
   const [inspectedParamId, setInspectedParamId] = useState<string | null>(initial.paramId);
   const [selectedScope, setSelectedScope] = useState('Maharashtra (Statewide)');
+  const [showWelcome, setShowWelcome] = useState(() => !sessionStorage.getItem('ps_welcomed'));
+  const finishWelcome = useCallback(() => {
+    sessionStorage.setItem('ps_welcomed', '1');
+    setShowWelcome(false);
+  }, []);
 
   // Sync state with browser back/forward buttons
   useEffect(() => {
@@ -111,6 +117,10 @@ const DashboardRoot: React.FC = () => {
     enabled: isAuthenticated && isGovernmentAuthorized,
     refetchInterval: 30000,
   });
+
+  if (showWelcome) {
+    return <WelcomeSplash onDone={finishWelcome} />;
+  }
 
   if (isLoading) {
     return (

@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
+import { Lock, User, AlertCircle, ArrowRight, LogIn } from 'lucide-react';
 import { useAuth } from '../core/context/AuthContext';
 import { Button } from '../components/ui/Button';
+
+// SIH 2026 PPT rounds: one-click jury login. Set both in Vercel env (never commit);
+// the button hides itself after the date below.
+const JURY_ID = import.meta.env.VITE_EVALUATOR_ID as string | undefined;
+const JURY_PASSWORD = import.meta.env.VITE_EVALUATOR_PASSWORD as string | undefined;
+const JURY_ACCESS =
+  Boolean(JURY_ID && JURY_PASSWORD) && Date.now() < new Date('2026-10-18T23:59:59+05:30').getTime();
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -17,11 +24,15 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
+    await signIn(identifier.trim(), password);
+  };
+
+  const signIn = async (id: string, pw: string) => {
     setError(null);
     setIsSubmitting(true);
 
     try {
-      await login({ identifier: identifier.trim(), password });
+      await login({ identifier: id, password: pw });
     } catch (err: any) {
       const serverMsg =
         err?.response?.data?.message ||
@@ -148,6 +159,28 @@ export const LoginPage: React.FC = () => {
               <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </form>
+
+          {JURY_ACCESS && (
+            <div className="mt-4 p-3 bg-[#E4EDF6] border border-[#C3D6EA] rounded-[4px]">
+              <p className="text-[11px] font-mono uppercase font-semibold text-[#1E5C97] mb-1">
+                SIH 2026 Jury Access
+              </p>
+              <p className="text-xs text-[#526074] mb-2.5 leading-relaxed">
+                Evaluators can enter the live Command Center directly. No credentials needed.
+              </p>
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                className="w-full font-semibold font-mono"
+                isLoading={isSubmitting}
+                onClick={() => signIn(JURY_ID!, JURY_PASSWORD!)}
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Direct Login</span>
+              </Button>
+            </div>
+          )}
 
           <div className="mt-4 pt-3 border-t border-[#E1E6EC] text-[11px] font-mono text-[#526074] text-center">
             <p>Authorized personnel only · 256-bit Stateless JWT Security</p>
