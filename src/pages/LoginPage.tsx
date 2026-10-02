@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
-import { Lock, User, AlertCircle, ArrowRight, LogIn, KeyRound } from 'lucide-react';
+import { Lock, User, AlertCircle, ArrowRight, KeyRound } from 'lucide-react';
 import { useAuth } from '../core/context/AuthContext';
 import { Button } from '../components/ui/Button';
 
-// SIH 2026 PPT rounds: one-click jury login. Set both in Vercel env (never commit);
-// the button hides itself after the date below.
-const JURY_ID = import.meta.env.VITE_EVALUATOR_ID as string | undefined;
-const JURY_PASSWORD = import.meta.env.VITE_EVALUATOR_PASSWORD as string | undefined;
-const JURY_ACCESS =
-  Boolean(JURY_ID && JURY_PASSWORD) && Date.now() < new Date('2026-10-18T23:59:59+05:30').getTime();
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
